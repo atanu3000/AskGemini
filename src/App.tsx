@@ -13,9 +13,10 @@ import ChatScreen from './Screens/ChatScreen';
 export default function App() {
   const colorScheme = useColorScheme();
   const ThemeColor = colorScheme === 'light' ? '#eee' : '#212121';
+  const barStyle = colorScheme === 'light' ? 'dark-content' : 'light-content';
   return (
     <View style={[styles.container, {backgroundColor: ThemeColor}]}>
-      <StatusBar backgroundColor={ThemeColor} barStyle={'dark-content'}/>
+      <StatusBar backgroundColor={ThemeColor} barStyle={barStyle}/>
       <ChatScreen />
     </View>
   );

@@ -20,6 +20,7 @@ import {
   InputContent,
 } from '@google/generative-ai';
 import {Google_API_KEY} from '../../API';
+import ChatContainer from '../Components/ChatContainer';
 
 const {height, width} = Dimensions.get('window');
 
@@ -33,7 +34,7 @@ const ChatScreen: React.FC = () => {
       ...prevHistory,
       {
         role: role,
-        parts: [{text: content}],
+        parts: [content],
       },
     ]);
   };
@@ -92,7 +93,7 @@ const ChatScreen: React.FC = () => {
           <Icon name={'ellipsis-vertical'} color={colorMode} size={20} />
         </TouchableWithoutFeedback>
       </View>
-      <Text>Hello</Text>
+      <ChatContainer chat={chatHistory}/>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.inputBarContainer}>
           <InputBar setText={setTextInput} runChat={runChat} />
@@ -119,7 +120,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 5,
-    paddingTop: 10,
+    paddingVertical: 10,
     alignItems: 'center',
   },
   inputBarContainer: {

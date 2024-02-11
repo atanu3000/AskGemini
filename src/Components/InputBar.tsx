@@ -23,7 +23,7 @@ const InputBar: React.FC<InputBarProps> = ({setText, runChat}) => {
   const [inputHeight, setInputHeight] = React.useState(40);
   const colorMode = useColorScheme() === 'dark' ? '#fff' : '#000';
   const Themecolor = useColorScheme() === 'dark' && {
-    backgroundColor: '#66666666',
+    backgroundColor: '#383838',
   };
 
   React.useEffect(() => {
