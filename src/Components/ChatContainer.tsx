@@ -3,15 +3,34 @@ import React from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import {InputContent} from '@google/generative-ai';
 import getMarkdownStyle from '../markdownStyle';
-import Markdown from 'react-native-markdown-display';
+import MarkdownDisplay from 'react-native-markdown-display';
 
 interface ChatContainerProps {
   chat: InputContent[];
 }
 
-const ChatContainer: React.FC<ChatContainerProps> = ({chat}) => {
+const addSpacesToCodeBlocks = (text: string): string => {
+  const lines = text.split(/\n/);
+  let insideCodeBlock = false;
+  const modifiedLines = lines.map(line => {
+    if (line.includes('`')) {
+      insideCodeBlock = !insideCodeBlock;
+      return `${line}`;
+    } else if (insideCodeBlock) {
+      return `    ${line}`; 
+    } else {
+      return line; 
+    }
+  });
+
+  const modifiedText = modifiedLines.join('\n');    
+  return modifiedText;
+}
+
+const ChatContainer: React.FC<ChatContainerProps> = React.memo(({chat}) => {
   const colorMode = useColorScheme() === 'dark' ? '#fff' : '#000';
   const markdownStyle = getMarkdownStyle();
+
   return (
     <View>
       <FlatList
@@ -30,18 +49,19 @@ const ChatContainer: React.FC<ChatContainerProps> = ({chat}) => {
                 <Text style={{color: colorMode}}>
                   {item.role === 'user' ? 'You' : 'AskGemini'}
                 </Text>
-                <Markdown style={markdownStyle}>
-                  {item.parts.toString()}
-                </Markdown>
+                <MarkdownDisplay style={markdownStyle}>
+                  {addSpacesToCodeBlocks(item.parts.toString().replace(/```/g, "\n`\n\n"))}
+                </MarkdownDisplay>
               </View>
             </View>
           </View>
         )}
         keyExtractor={(item, index) => index.toString()}
+        // inverted
       />
     </View>
   );
-};
+});
 
 export default ChatContainer;
 

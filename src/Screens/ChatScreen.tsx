@@ -39,47 +39,55 @@ const ChatScreen: React.FC = () => {
     ]);
   };
 
+  // React.useEffect(()=> {
+  //   console.log(chatHistory);
+  // },[chatHistory])
+
   async function runChat() {
     updateChatHistory('user', textInput);
-    const genAI = new GoogleGenerativeAI(Google_API_KEY);
-    const model = genAI.getGenerativeModel({model: 'gemini-pro'});
-
-    const generationConfig = {
-      temperature: 0.9,
-      topK: 1,
-      topP: 1,
-      maxOutputTokens: 2048,
-    };
-
-    const safetySettings = [
-      {
-        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-        threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-        threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-        threshold: HarmBlockThreshold.BLOCK_NONE,
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-    ];
-
-    const chat = model.startChat({
-      generationConfig,
-      safetySettings,
-      history: chatHistory,
-    });
-
-    const result = await chat.sendMessage(textInput!);
-    const response = result.response;
-    updateChatHistory('model', response.text());
-    console.log(response.text());
+    try {
+      const genAI = new GoogleGenerativeAI(Google_API_KEY);
+      const model = genAI.getGenerativeModel({model: 'gemini-pro'});
+  
+      const generationConfig = {
+        temperature: 0.9,
+        topK: 1,
+        topP: 1,
+        maxOutputTokens: 2048,
+      };
+  
+      const safetySettings = [
+        {
+          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+          threshold: HarmBlockThreshold.BLOCK_NONE,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+      ];
+  
+      const chat = model.startChat({
+        generationConfig,
+        safetySettings,
+        history: chatHistory,
+      });
+  
+      const result = await chat.sendMessage(textInput!);
+      const response = result.response;
+      updateChatHistory('model', response.text());
+    } catch (error) {
+      console.log(error);
+      updateChatHistory('model', 'Something went wrong. Please try again');
+    }
   }
 
   return (

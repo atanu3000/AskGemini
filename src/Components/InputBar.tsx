@@ -105,6 +105,7 @@ const InputBar: React.FC<InputBarProps> = ({setText, runChat}) => {
           onPress={() => {
             runChat();
             setTextInput('');
+            setInputHeight(40);
           }}>
           <Icon
             name={'paper-plane'}
