@@ -1,9 +1,11 @@
 import {
   Dimensions,
+  FlatList,
   Keyboard,
   KeyboardAvoidingView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
   useColorScheme,
@@ -28,6 +30,30 @@ const ChatScreen: React.FC = () => {
   const [textInput, setTextInput] = React.useState<string>('');
   const [chatHistory, setChatHistory] = React.useState<InputContent[]>([]);
   const colorMode = useColorScheme() === 'dark' ? '#fff' : '#000';
+  const scrollViewRef = React.useRef<FlatList<any>>(null);
+  const [showGoToBottomButton, setShowGoToBottomButton] = React.useState<boolean>(true);
+
+  const handleScroll = (event: {
+    nativeEvent: {
+      contentOffset: {y: number};
+      layoutMeasurement: {height: number};
+      contentSize: {height: number};
+    };
+  }) => {
+    const scrollPosition = event.nativeEvent.contentOffset.y;
+    const screenHeight = event.nativeEvent.layoutMeasurement.height;
+    const contentHeight = event.nativeEvent.contentSize.height;
+
+    const threshold = 150;
+    const isCloseToBottom =
+      contentHeight - screenHeight - scrollPosition < threshold;
+
+    setShowGoToBottomButton(!isCloseToBottom);
+  };
+
+  const handleGoToBottom = () => {
+    scrollViewRef.current?.scrollToEnd({animated: true});
+  };
 
   const updateChatHistory = (role: string, content: string) => {
     setChatHistory(prevHistory => [
@@ -101,7 +127,14 @@ const ChatScreen: React.FC = () => {
           <Icon name={'ellipsis-vertical'} color={colorMode} size={20} />
         </TouchableWithoutFeedback>
       </View>
-      <ChatContainer chat={chatHistory}/>
+      <ChatContainer chat={chatHistory} scrollRef={scrollViewRef} handleScroll={handleScroll}/>
+      {showGoToBottomButton && (
+        <TouchableOpacity
+          style={styles.goToBottomButton}
+          onPress={handleGoToBottom}>
+          <Icon name="angles-down" color={'#222'} size={16} />
+        </TouchableOpacity>
+      )}
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.inputBarContainer}>
           <InputBar setText={setTextInput} runChat={runChat} />
@@ -136,5 +169,14 @@ const styles = StyleSheet.create({
     bottom: 8,
     width: width * 0.95,
     alignSelf: 'center',
+  },
+  goToBottomButton: {
+    position: 'absolute',
+    bottom: 10,
+    alignSelf: 'center',
+    backgroundColor: '#aaa',
+    padding: 12,
+    paddingHorizontal: 32,
+    borderRadius: 20,
   },
 });

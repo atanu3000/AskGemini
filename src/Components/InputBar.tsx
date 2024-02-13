@@ -20,7 +20,7 @@ const InputBar: React.FC<InputBarProps> = ({setText, runChat}) => {
   const [textInput, setTextInput] = React.useState<string>('');
   const [marginBottom, setMarginBottom] = React.useState<number>(0);
   const [keyboardEnabled, setKeyboardEnabled] = React.useState(true);
-  const [inputHeight, setInputHeight] = React.useState(40);
+  const [inputHeight, setInputHeight] = React.useState(50);
   const colorMode = useColorScheme() === 'dark' ? '#fff' : '#000';
   const Themecolor = useColorScheme() === 'dark' && {
     backgroundColor: '#383838',
@@ -105,7 +105,7 @@ const InputBar: React.FC<InputBarProps> = ({setText, runChat}) => {
           onPress={() => {
             runChat();
             setTextInput('');
-            setInputHeight(40);
+            setInputHeight(50);
           }}>
           <Icon
             name={'paper-plane'}

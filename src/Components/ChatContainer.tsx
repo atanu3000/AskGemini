@@ -1,5 +1,5 @@
-import {FlatList, StyleSheet, Text, View, useColorScheme} from 'react-native';
-import React from 'react';
+import {FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View, useColorScheme} from 'react-native';
+import React, { RefObject } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import {InputContent} from '@google/generative-ai';
 import getMarkdownStyle from '../markdownStyle';
@@ -7,6 +7,14 @@ import MarkdownDisplay from 'react-native-markdown-display';
 
 interface ChatContainerProps {
   chat: InputContent[];
+  scrollRef: RefObject<FlatList<any>>
+  handleScroll: (event: {
+    nativeEvent: {
+      contentOffset: {y: number};
+      layoutMeasurement: {height: number};
+      contentSize: {height: number};
+    };
+  }) => void;
 }
 
 const addSpacesToCodeBlocks = (text: string): string => {
@@ -24,18 +32,22 @@ const addSpacesToCodeBlocks = (text: string): string => {
   });
 
   const modifiedText = modifiedLines.join('\n');    
+  // console.log(modifiedText);
+  
   return modifiedText;
 }
 
-const ChatContainer: React.FC<ChatContainerProps> = React.memo(({chat}) => {
+const ChatContainer: React.FC<ChatContainerProps> = React.memo(({chat, scrollRef, handleScroll}) => {
   const colorMode = useColorScheme() === 'dark' ? '#fff' : '#000';
   const markdownStyle = getMarkdownStyle();
 
   return (
-    <View>
+    <View style={{height: '86%'}}>
       <FlatList
         data={chat}
-        contentContainerStyle={{paddingBottom: 150}}
+        ref={scrollRef}
+        onScroll={handleScroll}
+        contentContainerStyle={{paddingBottom: 30}}
         showsVerticalScrollIndicator={false}
         renderItem={({item}) => (
           <View style={{marginVertical: 7, marginTop: 20}}>
@@ -57,12 +69,14 @@ const ChatContainer: React.FC<ChatContainerProps> = React.memo(({chat}) => {
           </View>
         )}
         keyExtractor={(item, index) => index.toString()}
-        // inverted
       />
+
     </View>
   );
 });
 
 export default ChatContainer;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  
+});
