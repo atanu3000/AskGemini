@@ -92,7 +92,8 @@ const InputBar: React.FC<InputBarProps> = ({setText, runChat}) => {
         placeholderTextColor={useColorScheme() === 'dark' ? '#bbb' : '#888'}
       />
       {textInput.trim().length === 0 ? (
-        <TouchableWithoutFeedback onPress={toggleKeyboard}>
+        <TouchableWithoutFeedback onPress={toggleKeyboard}
+        style={{padding: 20}}>
           <Icon
             name={'keyboard'}
             size={20}
@@ -106,7 +107,8 @@ const InputBar: React.FC<InputBarProps> = ({setText, runChat}) => {
             runChat();
             setTextInput('');
             setInputHeight(50);
-          }}>
+          }}
+          style={{padding: 20}}>
           <Icon
             name={'paper-plane'}
             size={20}
@@ -131,6 +133,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderWidth: 1,
-    borderColor: '#aaa',
+    borderColor: '#a7c2fc',
   },
 });

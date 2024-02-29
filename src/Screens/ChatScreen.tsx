@@ -24,14 +24,13 @@ import {
 import {Google_API_KEY} from '../../API';
 import ChatContainer from '../Components/ChatContainer';
 
-const {height, width} = Dimensions.get('window');
-
 const ChatScreen: React.FC = () => {
   const [textInput, setTextInput] = React.useState<string>('');
   const [chatHistory, setChatHistory] = React.useState<InputContent[]>([]);
   const colorMode = useColorScheme() === 'dark' ? '#fff' : '#000';
   const scrollViewRef = React.useRef<FlatList<any>>(null);
-  const [showGoToBottomButton, setShowGoToBottomButton] = React.useState<boolean>(true);
+  const [showGoToBottomButton, setShowGoToBottomButton] =
+    React.useState<boolean>(false);
 
   const handleScroll = (event: {
     nativeEvent: {
@@ -65,23 +64,19 @@ const ChatScreen: React.FC = () => {
     ]);
   };
 
-  // React.useEffect(()=> {
-  //   console.log(chatHistory);
-  // },[chatHistory])
-
   async function runChat() {
     updateChatHistory('user', textInput);
     try {
       const genAI = new GoogleGenerativeAI(Google_API_KEY);
       const model = genAI.getGenerativeModel({model: 'gemini-pro'});
-  
+
       const generationConfig = {
         temperature: 0.9,
         topK: 1,
         topP: 1,
         maxOutputTokens: 2048,
       };
-  
+
       const safetySettings = [
         {
           category: HarmCategory.HARM_CATEGORY_HARASSMENT,
@@ -100,13 +95,13 @@ const ChatScreen: React.FC = () => {
           threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
         },
       ];
-  
+
       const chat = model.startChat({
         generationConfig,
         safetySettings,
         history: chatHistory,
       });
-  
+
       const result = await chat.sendMessage(textInput!);
       const response = result.response;
       updateChatHistory('model', response.text());
@@ -117,7 +112,7 @@ const ChatScreen: React.FC = () => {
   }
 
   return (
-    <KeyboardAvoidingView behavior={'height'} style={styles.container}>
+    <KeyboardAvoidingView behavior={'height'} style={{height: '100%'}}>
       <View style={styles.headContainer}>
         <TouchableWithoutFeedback>
           <Icon name={'bars'} color={colorMode} size={20} />
@@ -127,19 +122,25 @@ const ChatScreen: React.FC = () => {
           <Icon name={'ellipsis-vertical'} color={colorMode} size={20} />
         </TouchableWithoutFeedback>
       </View>
-      <ChatContainer chat={chatHistory} scrollRef={scrollViewRef} handleScroll={handleScroll}/>
-      {showGoToBottomButton && (
-        <TouchableOpacity
-          style={styles.goToBottomButton}
-          onPress={handleGoToBottom}>
-          <Icon name="angles-down" color={'#222'} size={16} />
-        </TouchableOpacity>
-      )}
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.inputBarContainer}>
-          <InputBar setText={setTextInput} runChat={runChat} />
-        </View>
-      </TouchableWithoutFeedback>
+      <ChatContainer
+        chat={chatHistory}
+        scrollRef={scrollViewRef}
+        handleScroll={handleScroll}
+      />
+      <View style={{flex: 1}}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.inputBarContainer}>
+            {showGoToBottomButton && (
+              <TouchableOpacity
+                style={styles.goToBottomButton}
+                onPress={handleGoToBottom}>
+                <Icon name="angles-down" color={'#222'} size={16} />
+              </TouchableOpacity>
+            )}
+            <InputBar setText={setTextInput} runChat={runChat} />
+          </View>
+        </TouchableWithoutFeedback>
+      </View>
     </KeyboardAvoidingView>
   );
 };
@@ -147,12 +148,6 @@ const ChatScreen: React.FC = () => {
 export default ChatScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    height: height,
-    width: width,
-    flex: 1,
-    paddingHorizontal: 15,
-  },
   heading: {
     fontSize: 18,
     fontWeight: '500',
@@ -167,14 +162,13 @@ const styles = StyleSheet.create({
   inputBarContainer: {
     position: 'absolute',
     bottom: 8,
-    width: width * 0.95,
+    gap: 10,
+    width: '100%',
     alignSelf: 'center',
   },
   goToBottomButton: {
-    position: 'absolute',
-    bottom: 10,
     alignSelf: 'center',
-    backgroundColor: '#aaa',
+    backgroundColor: '#91b2fa',
     padding: 12,
     paddingHorizontal: 32,
     borderRadius: 20,
