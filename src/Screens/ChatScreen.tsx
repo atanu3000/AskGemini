@@ -1,12 +1,11 @@
 import {
-  Dimensions,
+  Animated,
   FlatList,
   Keyboard,
   KeyboardAvoidingView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
   useColorScheme,
 } from 'react-native';
@@ -24,13 +23,20 @@ import {
 import {Google_API_KEY} from '../../API';
 import ChatContainer from '../Components/ChatContainer';
 
-const ChatScreen: React.FC = () => {
+interface AnimationProps {
+  offsetValue: Animated.Value;
+  scaleValue?: Animated.Value;
+  closeButtonOffset?: Animated.Value;
+}
+
+const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
   const [textInput, setTextInput] = React.useState<string>('');
   const [chatHistory, setChatHistory] = React.useState<InputContent[]>([]);
   const colorMode = useColorScheme() === 'dark' ? '#fff' : '#000';
   const scrollViewRef = React.useRef<FlatList<any>>(null);
   const [showGoToBottomButton, setShowGoToBottomButton] =
     React.useState<boolean>(false);
+  const [showMenu, setShowMenu] = React.useState<boolean>(false);
 
   const handleScroll = (event: {
     nativeEvent: {
@@ -114,32 +120,51 @@ const ChatScreen: React.FC = () => {
   return (
     <KeyboardAvoidingView behavior={'height'} style={{height: '100%'}}>
       <View style={styles.headContainer}>
-        <TouchableWithoutFeedback>
-          <Icon name={'bars'} color={colorMode} size={20} />
-        </TouchableWithoutFeedback>
+        {
+          // Head container
+        }
+        <TouchableOpacity
+          onPress={() => {
+            Animated.timing(offsetValue, {
+              toValue: showMenu ? 0 : 315,
+              duration: 300,
+              useNativeDriver: true,
+            }).start();
+            setShowMenu(!showMenu);
+          }}
+          style={{paddingHorizontal: 0}}>
+          {showMenu ? (
+            <Icon name={'xmark'} color={colorMode} size={22} />
+          ) : (
+            <Icon name={'bars'} color={colorMode} size={20} />
+          )}
+        </TouchableOpacity>
         <Text style={[styles.heading, {color: colorMode}]}>AskGemini 1.0</Text>
-        <TouchableWithoutFeedback>
+        <TouchableOpacity>
           <Icon name={'ellipsis-vertical'} color={colorMode} size={20} />
-        </TouchableWithoutFeedback>
+        </TouchableOpacity>
       </View>
+
       <ChatContainer
         chat={chatHistory}
         scrollRef={scrollViewRef}
         handleScroll={handleScroll}
       />
+
       <View style={{flex: 1}}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.inputBarContainer}>
-            {showGoToBottomButton && (
-              <TouchableOpacity
-                style={styles.goToBottomButton}
-                onPress={handleGoToBottom}>
-                <Icon name="angles-down" color={'#222'} size={16} />
-              </TouchableOpacity>
-            )}
-            <InputBar setText={setTextInput} runChat={runChat} />
-          </View>
-        </TouchableWithoutFeedback>
+        {
+          // Scroller button and InputBar section
+        }
+        <View style={styles.inputBarContainer}>
+          {showGoToBottomButton && (
+            <TouchableOpacity
+              style={styles.goToBottomButton}
+              onPress={handleGoToBottom}>
+              <Icon name="angles-down" color={'#222'} size={16} />
+            </TouchableOpacity>
+          )}
+          <InputBar setText={setTextInput} runChat={runChat} />
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
