@@ -1,7 +1,6 @@
 import {
   Animated,
   FlatList,
-  Keyboard,
   KeyboardAvoidingView,
   StyleSheet,
   Text,
@@ -22,6 +21,7 @@ import {
 } from '@google/generative-ai';
 import {Google_API_KEY} from '../../API';
 import ChatContainer from '../Components/ChatContainer';
+import useChatContext from '../Context/ChatContext';
 
 interface AnimationProps {
   offsetValue: Animated.Value;
@@ -36,7 +36,19 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
   const scrollViewRef = React.useRef<FlatList<any>>(null);
   const [showGoToBottomButton, setShowGoToBottomButton] =
     React.useState<boolean>(false);
-  const [showMenu, setShowMenu] = React.useState<boolean>(false);
+  // const [showMenu, setShowMenu] = React.useState<boolean>(false);
+  const [title, setTitle] = React.useState<string>();
+  const {isChatStarted, setIsChatStarted, showMenu, setShowMenu} = useChatContext();
+
+  React.useEffect(() => {
+    const chatCleared = () => {
+      if (!isChatStarted) {
+        setChatHistory([]);
+      }      
+    };
+
+    chatCleared(); 
+  }, [isChatStarted]);
 
   const handleScroll = (event: {
     nativeEvent: {
@@ -70,8 +82,21 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
     ]);
   };
 
+  async function generateTitle() {
+    try {
+      const genAI = new GoogleGenerativeAI(Google_API_KEY);
+      const model = genAI.getGenerativeModel({model: 'gemini-pro'});
+      const query = ''
+      const result = await model.generateContent(query);
+      const response = result.response;
+    } catch (error) {
+      
+    }
+  }
+
   async function runChat() {
     updateChatHistory('user', textInput);
+    setIsChatStarted(true);
     try {
       const genAI = new GoogleGenerativeAI(Google_API_KEY);
       const model = genAI.getGenerativeModel({model: 'gemini-pro'});
