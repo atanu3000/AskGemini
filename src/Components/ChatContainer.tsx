@@ -61,7 +61,7 @@ const ChatItem: React.FC<{
           <Image source={modelImage} style={{height: 27, width: 27}} />
         )}
         <View style={{width: 332}}>
-          <Text style={{color: colorMode}}>
+          <Text style={{color: colorMode, fontWeight: '500'}}>
             {item.role === 'user' ? 'You' : 'AskGemini'}
           </Text>
           <MarkdownDisplay style={markdownStyle}>

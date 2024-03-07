@@ -1,7 +1,10 @@
 import {
   Animated,
   FlatList,
+  Image,
+  ImageBackground,
   KeyboardAvoidingView,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -22,6 +25,7 @@ import {
 import {Google_API_KEY} from '../../API';
 import ChatContainer from '../Components/ChatContainer';
 import useChatContext from '../Context/ChatContext';
+import suggestions from '../assets/suggestions';
 
 interface AnimationProps {
   offsetValue: Animated.Value;
@@ -33,21 +37,23 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
   const [textInput, setTextInput] = React.useState<string>('');
   const [chatHistory, setChatHistory] = React.useState<InputContent[]>([]);
   const colorMode = useColorScheme() === 'dark' ? '#fff' : '#000';
+  const isDarkTheme = useColorScheme() === 'dark' ? true : false;
   const scrollViewRef = React.useRef<FlatList<any>>(null);
   const [showGoToBottomButton, setShowGoToBottomButton] =
     React.useState<boolean>(false);
   // const [showMenu, setShowMenu] = React.useState<boolean>(false);
   const [title, setTitle] = React.useState<string>();
-  const {isChatStarted, setIsChatStarted, showMenu, setShowMenu} = useChatContext();
+  const {isChatStarted, setIsChatStarted, showMenu, setShowMenu} =
+    useChatContext();
 
   React.useEffect(() => {
     const chatCleared = () => {
       if (!isChatStarted) {
         setChatHistory([]);
-      }      
+      }
     };
 
-    chatCleared(); 
+    chatCleared();
   }, [isChatStarted]);
 
   const handleScroll = (event: {
@@ -86,12 +92,10 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
     try {
       const genAI = new GoogleGenerativeAI(Google_API_KEY);
       const model = genAI.getGenerativeModel({model: 'gemini-pro'});
-      const query = ''
+      const query = '';
       const result = await model.generateContent(query);
       const response = result.response;
-    } catch (error) {
-      
-    }
+    } catch (error) {}
   }
 
   async function runChat() {
@@ -141,7 +145,8 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
       updateChatHistory('model', 'Something went wrong. Please try again');
     }
   }
-
+  const modelImage = require('../../android/app/src/main/res/mipmap-hdpi/ic_launcher.png');
+  const gradientColors = '#124076';
   return (
     <KeyboardAvoidingView behavior={'height'} style={{height: '100%'}}>
       <View style={styles.headContainer}>
@@ -164,17 +169,136 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
             <Icon name={'bars'} color={colorMode} size={20} />
           )}
         </TouchableOpacity>
-        <Text style={[styles.heading, {color: colorMode}]}>AskGemini 1.0</Text>
+        <Text style={[styles.heading, {color: colorMode}]}>{title}</Text>
         <TouchableOpacity>
           <Icon name={'ellipsis-vertical'} color={colorMode} size={20} />
         </TouchableOpacity>
       </View>
 
-      <ChatContainer
-        chat={chatHistory}
-        scrollRef={scrollViewRef}
-        handleScroll={handleScroll}
-      />
+      {isChatStarted ? (
+        <ChatContainer
+          chat={chatHistory}
+          scrollRef={scrollViewRef}
+          handleScroll={handleScroll}
+        />
+      ) : (
+        <ScrollView
+          style={{marginTop: 15}}
+          showsVerticalScrollIndicator={false}>
+          <View style={{alignItems: 'center', alignSelf: 'center'}}>
+            <Image source={modelImage} style={{height: 55, width: 55}} />
+            <View style={{flexDirection: 'row'}}>
+              <Text
+                style={[
+                  styles.AskGemini,
+                  {color: isDarkTheme ? '#fff' : '#1B3C73' + 'ff'},
+                ]}>
+                A
+              </Text>
+              <Text
+                style={[
+                  styles.AskGemini,
+                  {color: isDarkTheme ? '#fff' : '#1B3C73' + 'cc'},
+                ]}>
+                s
+              </Text>
+              <Text
+                style={[
+                  styles.AskGemini,
+                  {color: isDarkTheme ? '#fff' : '#1B3C73' + '99'},
+                ]}>
+                k
+              </Text>
+              <Text
+                style={[
+                  styles.AskGemini,
+                  {color: isDarkTheme ? '#fff' : '#1B3C73' + '66'},
+                ]}>
+                G
+              </Text>
+              <Text
+                style={[
+                  styles.AskGemini,
+                  {color: isDarkTheme ? '#fff' : '#1B3C73' + '55'},
+                ]}>
+                e
+              </Text>
+              <Text
+                style={[
+                  styles.AskGemini,
+                  {color: isDarkTheme ? '#fff' : '#1B3C73' + '77'},
+                ]}>
+                m
+              </Text>
+              <Text
+                style={[
+                  styles.AskGemini,
+                  {color: isDarkTheme ? '#fff' : '#1B3C73' + '99'},
+                ]}>
+                i
+              </Text>
+              <Text
+                style={[
+                  styles.AskGemini,
+                  {color: isDarkTheme ? '#fff' : '#1B3C73' + 'cc'},
+                ]}>
+                n
+              </Text>
+              <Text
+                style={[
+                  styles.AskGemini,
+                  {color: isDarkTheme ? '#fff' : '#1B3C73' + 'ff'},
+                ]}>
+                i
+              </Text>
+            </View>
+            <Text style={[styles.tagLine, {color: colorMode}]}>
+              Your everyday AI assistant
+            </Text>
+          </View>
+          <ScrollView
+            horizontal={true}
+            style={{marginTop: 25}}
+            showsHorizontalScrollIndicator={false}>
+            {suggestions.map(suggestion => (
+              <View
+                key={suggestion.imgUri}
+                style={{height: 300, width: 270, margin: 10}}>
+                <Image
+                  source={{uri: suggestion.imgUri}}
+                  style={{height: 240, borderRadius: 10}}
+                />
+                <Text
+                  style={[
+                    styles.suggestions,
+                    {
+                      color: colorMode,
+                      backgroundColor: isDarkTheme ? '#2b2f33e4' : '#ffffffe4',
+                    },
+                  ]}>
+                  {suggestion.prompt}
+                </Text>
+              </View>
+            ))}
+          </ScrollView>
+          <Text style={[styles.confession, {color: colorMode}]}>
+            AskGemini is utilizing AI, can make mistakes.
+          </Text>
+          <View style={{flexDirection: 'row', gap: 5, marginTop: 25}}>
+            <Image source={modelImage} style={{height: 27, width: 27}} />
+            <Text style={[styles.model, {color: colorMode}]}>AskGemini</Text>
+          </View>
+          <Text
+            style={{
+              color: colorMode,
+              marginTop: 15,
+              lineHeight: 20,
+              marginLeft: 30,
+            }}>
+            Welcome back. I am excited to share more with you. What do you want to create today?
+          </Text>
+        </ScrollView>
+      )}
 
       <View style={{flex: 1}}>
         {
@@ -208,6 +332,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     paddingVertical: 10,
     alignItems: 'center',
+  },
+  AskGemini: {
+    fontSize: 34,
+    fontWeight: '500',
+  },
+  tagLine: {
+    fontSize: 18,
+    fontWeight: '300',
+    color: '#000',
+    letterSpacing: 0.8,
+    marginTop: 15,
+  },
+  suggestions: {
+    position: 'absolute',
+    bottom: 20,
+    alignSelf: 'center',
+    padding: 15,
+    borderRadius: 10,
+    elevation: 5,
+    shadowOffset: {
+      width: 1,
+      height: 1,
+    },
+    width: '94%',
+    lineHeight: 20,
+  },
+  confession: {
+    fontSize: 12,
+    color: '#000',
+    alignSelf: 'center',
+  },
+  model: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#000',
   },
   inputBarContainer: {
     position: 'absolute',
