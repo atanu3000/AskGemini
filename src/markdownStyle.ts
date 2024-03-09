@@ -1,7 +1,9 @@
 import { TextStyle, useColorScheme } from "react-native";
+import { useTheme } from "./Context/ThemeContext";
 
 const getMarkdownStyle = (): {[key: string]: TextStyle} => {
-  const colorScheme = useColorScheme();
+  const {theme} = useTheme();
+  const colorScheme = theme;
   
   return {
     strong: {

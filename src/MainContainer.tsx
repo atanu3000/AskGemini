@@ -1,10 +1,12 @@
 import {
   Animated,
+  Button,
   Image,
   SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
+  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
   useColorScheme,
@@ -13,44 +15,79 @@ import React from 'react';
 import ChatScreen from './Screens/ChatScreen';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome6';
-// import {ChatContext} from './Context/ChatContext';
 import useChatContext from './Context/ChatContext';
+import ThemeDialog from './Components/ThemeDialog';
+import {useTheme} from './Context/ThemeContext';
 
 const MainContainer = () => {
-  const colorScheme = useColorScheme();
-  const ThemeColor = colorScheme === 'light' ? '#fff' : '#212121';
-  const FontColor = colorScheme === 'light' ? '#212121' : '#fff';
-  const barStyle = colorScheme === 'light' ? 'dark-content' : 'light-content';
+  const {theme, mode} = useTheme();
+  const isDarkTheme = theme === 'dark' ? true : false;
+  const ThemeColor = !isDarkTheme ? '#fff' : '#212121';
+  const FontColor = !isDarkTheme ? '#212121' : '#fff';
+  const barStyle = !isDarkTheme ? 'dark-content' : 'light-content';
 
   const offsetValue = React.useRef(new Animated.Value(0)).current;
   const modelImage = require('../android/app/src/main/res/mipmap-hdpi/ic_launcher.png');
   const {setIsChatStarted, showMenu, setShowMenu} = useChatContext();
 
+  const [dialogVisible, setDialogVisible] = React.useState(false);
+  const toggleDialog = () => {
+    setDialogVisible(prevState => !prevState);
+  };
+
+  const capitalizeFirstLetter = (str: string) => {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
   return (
-    <SafeAreaView style={styles.menuContainer}>
+    <SafeAreaView
+      style={[
+        styles.menuContainer,
+        {backgroundColor: !isDarkTheme ? '#6a97f7' : '#1e2b47'},
+      ]}>
       <StatusBar backgroundColor={ThemeColor} barStyle={barStyle} />
-      <View>
-        <TouchableWithoutFeedback>
-          <View style={styles.searchBox}>
-            <Icon name={'magnifying-glass'} size={16} color={FontColor} />
-            <Text style={{color: FontColor, fontSize: 15}}>Search</Text>
+      <View style={{height: '100%', justifyContent: 'space-between'}}>
+        <View>
+          <TouchableWithoutFeedback>
+            <View
+              style={[
+                styles.searchBox,
+                {backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675'},
+              ]}>
+              <Icon name={'magnifying-glass'} size={16} color={FontColor} />
+              <Text style={{color: FontColor, fontSize: 15}}>Search</Text>
+            </View>
+          </TouchableWithoutFeedback>
+          <TouchableWithoutFeedback
+            onPress={() => {
+              setIsChatStarted(false);
+              setShowMenu(false);
+              Animated.timing(offsetValue, {
+                toValue: showMenu ? 0 : 315,
+                duration: 300,
+                useNativeDriver: true,
+              }).start();
+            }}>
+            <View
+              style={[
+                styles.newChat,
+                {backgroundColor: !isDarkTheme ? '#acdcfa' : '#60879e'},
+              ]}>
+              <Image source={modelImage} style={{height: 35, width: 35}} />
+              <Text style={{color: FontColor, fontSize: 15}}>AskGemini</Text>
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
+        <TouchableOpacity onPress={toggleDialog} style={styles.themeButton}>
+          <View>
+            <View style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
+              <Icon name={'circle-half-stroke'} color={FontColor} size={20} style={{paddingTop: 5}}/>
+              <Text style={{color: FontColor, fontSize: 14}}>Theme</Text>
+            </View>
+            <Text style={{color: FontColor, paddingLeft: 35}}>{capitalizeFirstLetter(mode)}</Text>
           </View>
-        </TouchableWithoutFeedback>
-        <TouchableWithoutFeedback
-          onPress={() => {
-            setIsChatStarted(false);
-            setShowMenu(false);
-            Animated.timing(offsetValue, {
-              toValue: showMenu ? 0 : 315,
-              duration: 300,
-              useNativeDriver: true,
-            }).start();
-          }}>
-          <View style={styles.newChat}>
-            <Image source={modelImage} style={{height: 35, width: 35}} />
-            <Text style={{color: FontColor, fontSize: 15}}>AskGemini</Text>
-          </View>
-        </TouchableWithoutFeedback>
+        </TouchableOpacity>
+        <ThemeDialog visible={dialogVisible} onClose={toggleDialog} />
       </View>
       <Animated.View
         style={{
@@ -75,13 +112,11 @@ const styles = StyleSheet.create({
   menuContainer: {
     height: '100%',
     width: '100%',
-    backgroundColor: '#6a97f7',
   },
   searchBox: {
     flexDirection: 'row',
     gap: 10,
     alignItems: 'center',
-    backgroundColor: '#9dbafa',
     borderRadius: 30,
     paddingVertical: 15,
     paddingHorizontal: 20,
@@ -94,7 +129,6 @@ const styles = StyleSheet.create({
     gap: 10,
     alignItems: 'center',
     marginTop: 15,
-    backgroundColor: '#acdcfa',
     paddingLeft: 20,
     paddingVertical: 15,
   },
@@ -103,6 +137,11 @@ const styles = StyleSheet.create({
     width: '100%',
     flex: 1,
     paddingHorizontal: 10,
+  },
+  themeButton: {
+    paddingVertical: 10,
+    marginBottom: 10,
+    paddingLeft: 25,
   },
 });
 

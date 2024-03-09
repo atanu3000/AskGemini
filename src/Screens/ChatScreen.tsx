@@ -26,6 +26,7 @@ import {Google_API_KEY} from '../../API';
 import ChatContainer from '../Components/ChatContainer';
 import useChatContext from '../Context/ChatContext';
 import suggestions from '../assets/suggestions';
+import { useTheme } from '../Context/ThemeContext';
 
 interface AnimationProps {
   offsetValue: Animated.Value;
@@ -36,8 +37,9 @@ interface AnimationProps {
 const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
   const [textInput, setTextInput] = React.useState<string>('');
   const [chatHistory, setChatHistory] = React.useState<InputContent[]>([]);
-  const colorMode = useColorScheme() === 'dark' ? '#fff' : '#000';
-  const isDarkTheme = useColorScheme() === 'dark' ? true : false;
+  const {theme} = useTheme();
+  const colorMode = theme === 'dark' ? '#fff' : '#000';
+  const isDarkTheme = theme === 'dark' ? true : false;
   const scrollViewRef = React.useRef<FlatList<any>>(null);
   const [showGoToBottomButton, setShowGoToBottomButton] =
     React.useState<boolean>(false);
@@ -50,6 +52,7 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
     const chatCleared = () => {
       if (!isChatStarted) {
         setChatHistory([]);
+        setShowGoToBottomButton(false);
       }
     };
 
@@ -288,13 +291,7 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
             <Image source={modelImage} style={{height: 27, width: 27}} />
             <Text style={[styles.model, {color: colorMode}]}>AskGemini</Text>
           </View>
-          <Text
-            style={{
-              color: colorMode,
-              marginTop: 15,
-              lineHeight: 20,
-              marginLeft: 30,
-            }}>
+          <Text style={[styles.initialPrompt, {color: colorMode}]}>
             Welcome back. I am excited to share more with you. What do you want to create today?
           </Text>
         </ScrollView>
@@ -367,6 +364,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: '#000',
+  },
+  initialPrompt: {
+    marginTop: 15,
+    lineHeight: 20,
+    marginLeft: 30,
   },
   inputBarContainer: {
     position: 'absolute',

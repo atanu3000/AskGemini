@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import React, {RefObject} from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome6';
+import {useTheme} from '../Context/ThemeContext';
 
 interface InputBarProps {
   setText: (value: string) => void;
@@ -21,8 +22,9 @@ const InputBar: React.FC<InputBarProps> = ({setText, runChat}) => {
   const [marginBottom, setMarginBottom] = React.useState<number>(0);
   const [keyboardEnabled, setKeyboardEnabled] = React.useState(true);
   const [inputHeight, setInputHeight] = React.useState(50);
-  const colorMode = useColorScheme() === 'dark' ? '#fff' : '#000';
-  const Themecolor = useColorScheme() === 'dark' && {
+  const {theme} = useTheme();
+  const colorMode = theme === 'dark' ? '#fff' : '#000';
+  const Themecolor = theme === 'dark' && {
     backgroundColor: '#383838',
   };
 
@@ -89,11 +91,12 @@ const InputBar: React.FC<InputBarProps> = ({setText, runChat}) => {
         autoCorrect={false}
         autoCapitalize="sentences"
         placeholder="Ask me anything..."
-        placeholderTextColor={useColorScheme() === 'dark' ? '#bbb' : '#888'}
+        placeholderTextColor={theme === 'dark' ? '#bbb' : '#888'}
       />
       {textInput.trim().length === 0 ? (
-        <TouchableWithoutFeedback onPress={toggleKeyboard}
-        style={{padding: 20}}>
+        <TouchableWithoutFeedback
+          onPress={toggleKeyboard}
+          style={{padding: 20}}>
           <Icon
             name={'keyboard'}
             size={20}
