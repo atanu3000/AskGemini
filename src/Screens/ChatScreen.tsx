@@ -2,14 +2,12 @@ import {
   Animated,
   FlatList,
   Image,
-  ImageBackground,
   KeyboardAvoidingView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  useColorScheme,
 } from 'react-native';
 import React from 'react';
 import InputBar from '../Components/InputBar';
@@ -103,7 +101,7 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
 
   async function runChat() {
     updateChatHistory('user', textInput);
-    setIsChatStarted(true);
+    setIsChatStarted(true);    
     try {
       const genAI = new GoogleGenerativeAI(Google_API_KEY);
       const model = genAI.getGenerativeModel({model: 'gemini-pro'});
@@ -149,7 +147,6 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
     }
   }
   const modelImage = require('../../android/app/src/main/res/mipmap-hdpi/ic_launcher.png');
-  const gradientColors = '#124076';
   return (
     <KeyboardAvoidingView behavior={'height'} style={{height: '100%'}}>
       <View style={styles.headContainer}>

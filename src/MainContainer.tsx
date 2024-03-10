@@ -37,7 +37,7 @@ const MainContainer = () => {
 
   const capitalizeFirstLetter = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1);
-  }
+  };
 
   return (
     <SafeAreaView
@@ -78,13 +78,25 @@ const MainContainer = () => {
             </View>
           </TouchableWithoutFeedback>
         </View>
-        <TouchableOpacity onPress={toggleDialog} style={styles.themeButton}>
+        <TouchableOpacity
+          onPress={toggleDialog}
+          style={[
+            styles.themeButton,
+            {backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675'},
+          ]}>
           <View>
             <View style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
-              <Icon name={'circle-half-stroke'} color={FontColor} size={20} style={{paddingTop: 5}}/>
+              <Icon
+                name={'circle-half-stroke'}
+                color={FontColor}
+                size={20}
+                style={{paddingTop: 5}}
+              />
               <Text style={{color: FontColor, fontSize: 14}}>Theme</Text>
             </View>
-            <Text style={{color: FontColor, paddingLeft: 35}}>{capitalizeFirstLetter(mode)}</Text>
+            <Text style={{color: FontColor, paddingLeft: 35}}>
+              {capitalizeFirstLetter(mode)}
+            </Text>
           </View>
         </TouchableOpacity>
         <ThemeDialog visible={dialogVisible} onClose={toggleDialog} />
@@ -140,7 +152,10 @@ const styles = StyleSheet.create({
   },
   themeButton: {
     paddingVertical: 10,
-    marginBottom: 10,
+    marginVertical: 10,
+    width: '75%',
+    marginHorizontal: 10,
+    borderRadius: 20,
     paddingLeft: 25,
   },
 });
