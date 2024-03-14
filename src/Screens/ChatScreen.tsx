@@ -20,7 +20,7 @@ import {
   HarmBlockThreshold,
   InputContent,
 } from '@google/generative-ai';
-import {Google_API_KEY} from '../../API';
+import {Google_API_KEY1, Google_API_KEY2} from '../../API';
 import ChatContainer from '../Components/ChatContainer';
 import useChatContext from '../Context/ChatContext';
 import suggestions from '../assets/suggestions';
@@ -41,7 +41,6 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
   const scrollViewRef = React.useRef<FlatList<any>>(null);
   const [showGoToBottomButton, setShowGoToBottomButton] =
     React.useState<boolean>(false);
-  // const [showMenu, setShowMenu] = React.useState<boolean>(false);
   const [title, setTitle] = React.useState<string>();
   const {isChatStarted, setIsChatStarted, showMenu, setShowMenu} =
     useChatContext();
@@ -51,6 +50,7 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
       if (!isChatStarted) {
         setChatHistory([]);
         setShowGoToBottomButton(false);
+        setTitle('');
       }
     };
 
@@ -89,21 +89,33 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
     ]);
   };
 
+  const API_KEYS = [Google_API_KEY1, Google_API_KEY2];
+
+  let currentApiKeyIndex = 0;
+
+  function getNextApiKey() {
+    currentApiKeyIndex = (currentApiKeyIndex + 1) % API_KEYS.length; 
+    return API_KEYS[currentApiKeyIndex];
+}
+
   async function generateTitle() {
+    const api_key = getNextApiKey();
     try {
-      const genAI = new GoogleGenerativeAI(Google_API_KEY);
+      const genAI = new GoogleGenerativeAI(api_key);
       const model = genAI.getGenerativeModel({model: 'gemini-pro'});
-      const query = '';
+      const query = 'Write a very short title in 3 to 5 words about the following topic: ' + textInput;
       const result = await model.generateContent(query);
       const response = result.response;
+      setTitle(response.text());      
     } catch (error) {}
   }
 
   async function runChat() {
     updateChatHistory('user', textInput);
     setIsChatStarted(true);    
+    const api_key = getNextApiKey();
     try {
-      const genAI = new GoogleGenerativeAI(Google_API_KEY);
+      const genAI = new GoogleGenerativeAI(api_key);
       const model = genAI.getGenerativeModel({model: 'gemini-pro'});
 
       const generationConfig = {
@@ -144,8 +156,13 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
     } catch (error) {
       console.log(error);
       updateChatHistory('model', 'Something went wrong. Please try again');
+    } finally {
+      if (!isChatStarted) {
+        generateTitle();
+      }
     }
   }
+
   const modelImage = require('../../android/app/src/main/res/mipmap-hdpi/ic_launcher.png');
   return (
     <KeyboardAvoidingView behavior={'height'} style={{height: '100%'}}>
@@ -169,7 +186,7 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
             <Icon name={'bars'} color={colorMode} size={20} />
           )}
         </TouchableOpacity>
-        <Text style={[styles.heading, {color: colorMode}]}>{title}</Text>
+        <Text style={[styles.heading, {color: colorMode}]}>{title?.split('').slice(0, 27) }{ title?.length! > 27 && '...'}</Text>
         <TouchableOpacity>
           <Icon name={'ellipsis-vertical'} color={colorMode} size={20} />
         </TouchableOpacity>
