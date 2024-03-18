@@ -4,11 +4,14 @@ import {ChatContext, ChatContextProps } from "./ChatContext";
 const ChatProvider: React.FC<{ children: ReactNode }> = ({children}) => {
     const [isChatStarted, setIsChatStarted] = React.useState<boolean>(false);
     const [showMenu, setShowMenu] = React.useState<boolean>(false);
+    const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const ContextValues: ChatContextProps = {
         isChatStarted,
         setIsChatStarted,
         showMenu,
-        setShowMenu
+        setShowMenu,
+        isLoading,
+        setIsLoading
     }
     return(
         <ChatContext.Provider

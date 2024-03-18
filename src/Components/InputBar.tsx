@@ -11,6 +11,7 @@ import {
 import React, {RefObject} from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import {useTheme} from '../Context/ThemeContext';
+import useChatContext from '../Context/ChatContext';
 
 interface InputBarProps {
   setText: (value: string) => void;
@@ -72,6 +73,8 @@ const InputBar: React.FC<InputBarProps> = ({setText, runChat}) => {
     setText(value);
   };
 
+  const {isLoading} = useChatContext();
+
   return (
     <View style={[styles.textInputContainer, {marginBottom}, Themecolor]}>
       <TextInput
@@ -93,32 +96,43 @@ const InputBar: React.FC<InputBarProps> = ({setText, runChat}) => {
         placeholder="Ask me anything..."
         placeholderTextColor={theme === 'dark' ? '#bbb' : '#888'}
       />
-      {textInput.trim().length === 0 ? (
-        <TouchableWithoutFeedback
-          onPress={toggleKeyboard}
-          style={{padding: 20}}>
-          <Icon
-            name={'keyboard'}
+      {isLoading ? (
+        <TouchableWithoutFeedback>
+          <Icon 
+            name={'circle-stop'}
             size={20}
             color={colorMode}
             style={{paddingRight: 10}}
           />
         </TouchableWithoutFeedback>
       ) : (
-        <TouchableWithoutFeedback
-          onPress={() => {
-            runChat();
-            setTextInput('');
-            setInputHeight(50);
-          }}
-          style={{padding: 20}}>
-          <Icon
-            name={'paper-plane'}
-            size={20}
-            color={colorMode}
-            style={{paddingRight: 10}}
-          />
-        </TouchableWithoutFeedback>
+        textInput.trim().length === 0 ? (
+          <TouchableWithoutFeedback
+            onPress={toggleKeyboard}
+            style={{padding: 20}}>
+            <Icon
+              name={'keyboard'}
+              size={20}
+              color={colorMode}
+              style={{paddingRight: 10}}
+            />
+          </TouchableWithoutFeedback>
+        ) : (
+          <TouchableWithoutFeedback
+            onPress={() => {
+              runChat();
+              setTextInput('');
+              setInputHeight(50);
+            }}
+            style={{padding: 20}}>
+            <Icon
+              name={'paper-plane'}
+              size={20}
+              color={colorMode}
+              style={{paddingRight: 10}}
+            />
+          </TouchableWithoutFeedback>
+        )
       )}
     </View>
   );

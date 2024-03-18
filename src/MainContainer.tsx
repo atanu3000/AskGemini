@@ -1,6 +1,7 @@
 import {
   Animated,
   Button,
+  Dimensions,
   Image,
   SafeAreaView,
   StatusBar,
@@ -9,7 +10,6 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  useColorScheme,
 } from 'react-native';
 import React from 'react';
 import ChatScreen from './Screens/ChatScreen';
@@ -25,6 +25,7 @@ const MainContainer = () => {
   const ThemeColor = !isDarkTheme ? '#fff' : '#212121';
   const FontColor = !isDarkTheme ? '#212121' : '#fff';
   const barStyle = !isDarkTheme ? 'dark-content' : 'light-content';
+  const {width} = Dimensions.get('window');  
 
   const offsetValue = React.useRef(new Animated.Value(0)).current;
   const modelImage = require('../android/app/src/main/res/mipmap-hdpi/ic_launcher.png');
@@ -34,7 +35,7 @@ const MainContainer = () => {
   const toggleDialog = () => {
     setDialogVisible(prevState => !prevState);
   };
-
+  
   const capitalizeFirstLetter = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
@@ -63,7 +64,7 @@ const MainContainer = () => {
               setIsChatStarted(false);
               setShowMenu(false);
               Animated.timing(offsetValue, {
-                toValue: showMenu ? 0 : 315,
+                toValue: showMenu ? 0 : width*0.8,
                 duration: 300,
                 useNativeDriver: true,
               }).start();

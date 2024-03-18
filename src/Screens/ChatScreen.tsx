@@ -1,5 +1,6 @@
 import {
   Animated,
+  Dimensions,
   FlatList,
   Image,
   KeyboardAvoidingView,
@@ -24,7 +25,7 @@ import {Google_API_KEY1, Google_API_KEY2} from '../../API';
 import ChatContainer from '../Components/ChatContainer';
 import useChatContext from '../Context/ChatContext';
 import suggestions from '../assets/suggestions';
-import { useTheme } from '../Context/ThemeContext';
+import {useTheme} from '../Context/ThemeContext';
 
 interface AnimationProps {
   offsetValue: Animated.Value;
@@ -42,8 +43,14 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
   const [showGoToBottomButton, setShowGoToBottomButton] =
     React.useState<boolean>(false);
   const [title, setTitle] = React.useState<string>();
-  const {isChatStarted, setIsChatStarted, showMenu, setShowMenu} =
-    useChatContext();
+  const [currentApiKeyIndex, setCurrentApiKeyIndex] = React.useState<number>(0);
+  const {
+    isChatStarted,
+    setIsChatStarted,
+    showMenu,
+    setShowMenu,
+    setIsLoading,
+  } = useChatContext();
 
   React.useEffect(() => {
     const chatCleared = () => {
@@ -79,7 +86,7 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
     scrollViewRef.current?.scrollToEnd({animated: true});
   };
 
-  const updateChatHistory = (role: string, content: string) => {
+  const updateChatHistory = async (role: string, content: string) => {
     setChatHistory(prevHistory => [
       ...prevHistory,
       {
@@ -91,28 +98,31 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
 
   const API_KEYS = [Google_API_KEY1, Google_API_KEY2];
 
-  let currentApiKeyIndex = 0;
+  // let currentApiKeyIndex = 0;
 
   function getNextApiKey() {
-    currentApiKeyIndex = (currentApiKeyIndex + 1) % API_KEYS.length; 
+    setCurrentApiKeyIndex((currentApiKeyIndex + 1) % API_KEYS.length);
     return API_KEYS[currentApiKeyIndex];
-}
+  }
 
   async function generateTitle() {
     const api_key = getNextApiKey();
     try {
       const genAI = new GoogleGenerativeAI(api_key);
       const model = genAI.getGenerativeModel({model: 'gemini-pro'});
-      const query = 'Write a very short title in 3 to 5 words about the following topic: ' + textInput;
+      const query =
+        'Write a very short title in 3 to 5 words about the following topic: ' +
+        textInput;
       const result = await model.generateContent(query);
       const response = result.response;
-      setTitle(response.text());      
+      setTitle(response.text());
     } catch (error) {}
   }
 
   async function runChat() {
-    updateChatHistory('user', textInput);
-    setIsChatStarted(true);    
+    await updateChatHistory('user', textInput);
+    setIsChatStarted(true);
+    setIsLoading(true);
     const api_key = getNextApiKey();
     try {
       const genAI = new GoogleGenerativeAI(api_key);
@@ -160,9 +170,10 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
       if (!isChatStarted) {
         generateTitle();
       }
+      setIsLoading(false);
     }
   }
-
+  const {width} = Dimensions.get('window');
   const modelImage = require('../../android/app/src/main/res/mipmap-hdpi/ic_launcher.png');
   return (
     <KeyboardAvoidingView behavior={'height'} style={{height: '100%'}}>
@@ -173,7 +184,7 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
         <TouchableOpacity
           onPress={() => {
             Animated.timing(offsetValue, {
-              toValue: showMenu ? 0 : 315,
+              toValue: showMenu ? 0 : width * 0.8,
               duration: 300,
               useNativeDriver: true,
             }).start();
@@ -186,7 +197,10 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
             <Icon name={'bars'} color={colorMode} size={20} />
           )}
         </TouchableOpacity>
-        <Text style={[styles.heading, {color: colorMode}]}>{title?.split('').slice(0, 27) }{ title?.length! > 27 && '...'}</Text>
+        <Text style={[styles.heading, {color: colorMode}]}>
+          {title?.split('').slice(0, 27)}
+          {title?.length! > 27 && '...'}
+        </Text>
         <TouchableOpacity>
           <Icon name={'ellipsis-vertical'} color={colorMode} size={20} />
         </TouchableOpacity>
@@ -200,7 +214,7 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
         />
       ) : (
         <ScrollView
-          style={{marginTop: 15}}
+          contentContainerStyle={{paddingBottom: 100}}
           showsVerticalScrollIndicator={false}>
           <View style={{alignItems: 'center', alignSelf: 'center'}}>
             <Image source={modelImage} style={{height: 55, width: 55}} />
@@ -306,7 +320,8 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
             <Text style={[styles.model, {color: colorMode}]}>AskGemini</Text>
           </View>
           <Text style={[styles.initialPrompt, {color: colorMode}]}>
-            Welcome back. I am excited to share more with you. What do you want to create today?
+            Welcome back. I am excited to share more with you. What do you want
+            to create today?
           </Text>
         </ScrollView>
       )}

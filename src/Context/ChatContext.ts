@@ -5,6 +5,8 @@ export interface ChatContextProps {
   setIsChatStarted: React.Dispatch<React.SetStateAction<boolean>>;
   showMenu: boolean;
   setShowMenu: React.Dispatch<React.SetStateAction<boolean>>;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const ChatContext = createContext<ChatContextProps | undefined>(undefined);
