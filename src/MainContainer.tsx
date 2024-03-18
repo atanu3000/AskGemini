@@ -29,7 +29,7 @@ const MainContainer = () => {
 
   const offsetValue = React.useRef(new Animated.Value(0)).current;
   const modelImage = require('../android/app/src/main/res/mipmap-hdpi/ic_launcher.png');
-  const {setIsChatStarted, showMenu, setShowMenu} = useChatContext();
+  const {setIsChatStarted, showMenu, setShowMenu, isLoading} = useChatContext();
 
   const [dialogVisible, setDialogVisible] = React.useState(false);
   const toggleDialog = () => {
@@ -61,7 +61,7 @@ const MainContainer = () => {
           </TouchableWithoutFeedback>
           <TouchableWithoutFeedback
             onPress={() => {
-              setIsChatStarted(false);
+              !isLoading && setIsChatStarted(false);
               setShowMenu(false);
               Animated.timing(offsetValue, {
                 toValue: showMenu ? 0 : width*0.8,

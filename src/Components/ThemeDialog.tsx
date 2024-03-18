@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import { useTheme } from '../Context/ThemeContext';
 
@@ -22,29 +22,34 @@ const ThemeDialog: React.FC<ThemeDialogProps> = ({ visible, onClose }) => {
   if (!visible) return null;
 
   return (
-    <View style={[styles.popup, {backgroundColor: backgroundColor}]}>
-      <Text style={{ fontSize: 18, marginBottom: 10 , color: fontColor}}>Select Theme</Text>
-      <RadioButton.Group onValueChange={handleThemeChange} value={mode}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5}}>
-          <RadioButton.Android value="default" />
-          <TouchableOpacity onPress={() => handleThemeChange('default')}>
-            <Text style={{color: fontColor}}>System (Default)</Text>
-          </TouchableOpacity>
+    <>
+      <StatusBar backgroundColor={theme === 'dark' ? '#000' : '#00000066'}/>
+      <View style={{position: 'absolute', zIndex: 100, height: '100%', width: '100%', backgroundColor: '#00000066'}}>
+        <View style={[styles.popup, {backgroundColor: backgroundColor}]}>
+          <Text style={{ fontSize: 18, marginBottom: 10 , color: fontColor}}>Select Theme</Text>
+          <RadioButton.Group onValueChange={handleThemeChange} value={mode}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5}}>
+              <RadioButton.Android value="default" />
+              <TouchableOpacity onPress={() => handleThemeChange('default')}>
+                <Text style={{color: fontColor}}>System (Default)</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5}}>
+              <RadioButton.Android value="light" />
+              <TouchableOpacity onPress={() => handleThemeChange('light')}>
+                <Text style={{color: fontColor}}>Light Mode</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5}}>
+              <RadioButton.Android value="dark" />
+              <TouchableOpacity onPress={() => handleThemeChange('dark')}>
+                <Text style={{color: fontColor}}>Dark Mode</Text>
+              </TouchableOpacity>
+            </View>
+          </RadioButton.Group>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5}}>
-          <RadioButton.Android value="light" />
-          <TouchableOpacity onPress={() => handleThemeChange('light')}>
-            <Text style={{color: fontColor}}>Light Mode</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5}}>
-          <RadioButton.Android value="dark" />
-          <TouchableOpacity onPress={() => handleThemeChange('dark')}>
-            <Text style={{color: fontColor}}>Dark Mode</Text>
-          </TouchableOpacity>
-        </View>
-      </RadioButton.Group>
-    </View>
+      </View>
+    </>
   );
 };
 
@@ -63,7 +68,7 @@ const styles = StyleSheet.create({
     
     padding: 25,
     borderRadius: 15,
-    zIndex: 9999,
+    
   },
   popupText: {
     fontSize: 16,

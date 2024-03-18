@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import React from 'react';
@@ -35,6 +36,8 @@ interface AnimationProps {
 
 const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
   const [textInput, setTextInput] = React.useState<string>('');
+  const [isSuggestionChat, setIsSuggestionChat] =
+    React.useState<boolean>(false);
   const [chatHistory, setChatHistory] = React.useState<InputContent[]>([]);
   const {theme} = useTheme();
   const colorMode = theme === 'dark' ? '#fff' : '#000';
@@ -173,6 +176,19 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
       setIsLoading(false);
     }
   }
+
+  React.useEffect(() => {
+    if (textInput !== '' && isSuggestionChat) {
+      runChat();
+    }
+    setIsSuggestionChat(false);
+  }, [textInput]);
+
+  const startSuggestionChats = (text: string) => {
+    setTextInput(text);
+    setIsSuggestionChat(true);
+  };
+
   const {width} = Dimensions.get('window');
   const modelImage = require('../../android/app/src/main/res/mipmap-hdpi/ic_launcher.png');
   return (
@@ -295,20 +311,29 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
               <View
                 key={suggestion.imgUri}
                 style={{height: 300, width: 270, margin: 10}}>
-                <Image
-                  source={{uri: suggestion.imgUri}}
-                  style={{height: 240, borderRadius: 10}}
-                />
-                <Text
-                  style={[
-                    styles.suggestions,
-                    {
-                      color: colorMode,
-                      backgroundColor: isDarkTheme ? '#2b2f33e4' : '#ffffffe4',
-                    },
-                  ]}>
-                  {suggestion.prompt}
-                </Text>
+                <TouchableWithoutFeedback
+                  onPress={() => {
+                    startSuggestionChats(suggestion.prompt);
+                  }}>
+                  <View>
+                    <Image
+                      source={{uri: suggestion.imgUri}}
+                      style={{height: 240, borderRadius: 10}}
+                    />
+                    <Text
+                      style={[
+                        styles.suggestions,
+                        {
+                          color: colorMode,
+                          backgroundColor: isDarkTheme
+                            ? '#2b2f33e4'
+                            : '#ffffffe4',
+                        },
+                      ]}>
+                      {suggestion.prompt}
+                    </Text>
+                  </View>
+                </TouchableWithoutFeedback>
               </View>
             ))}
           </ScrollView>
@@ -372,7 +397,7 @@ const styles = StyleSheet.create({
   },
   suggestions: {
     position: 'absolute',
-    bottom: 20,
+    bottom: -40,
     alignSelf: 'center',
     padding: 15,
     borderRadius: 10,
