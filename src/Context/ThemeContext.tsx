@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { ReactNode, createContext, useContext, useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
 
@@ -22,8 +23,25 @@ export const ThemeProvider: React.FC<{ children: ReactNode}> = ({ children }) =>
   const defaultTheme = useColorScheme() === 'dark' ? 'dark' : 'light';
   const [theme, setTheme] = useState<string>(defaultTheme);
   const [mode, setMode] = useState<string>('default');
+
+  const fetchMode = async (): Promise<string | null> => {
+    try {
+      const themeMode = await AsyncStorage.getItem('askGemini_theme_mode');
+      return themeMode;
+    } catch (error) {
+      console.error('Error fetching mode:', error);
+      return null; 
+    }
+  }
   
   useEffect(() => {
+    const getThemeMode = async () => {
+      const theme = await fetchMode();
+      theme && setMode(theme as string);
+    }
+
+    getThemeMode();
+
     if (mode === 'default') {
       setTheme(defaultTheme)      
     } else (

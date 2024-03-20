@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import { useTheme } from '../Context/ThemeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 interface ThemeDialogProps {
@@ -17,7 +18,12 @@ const ThemeDialog: React.FC<ThemeDialogProps> = ({ visible, onClose }) => {
   const handleThemeChange = (selectedTheme: string) => {
     setMode(selectedTheme);
     onClose();
+    saveMode(selectedTheme);
   };
+
+  const saveMode = async (themeMode: string) => {
+    await AsyncStorage.setItem('askGemini_theme_mode', themeMode);
+  }
 
   if (!visible) return null;
 
