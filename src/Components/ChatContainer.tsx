@@ -2,12 +2,7 @@ import {
   Dimensions,
   FlatList,
   Image,
-  Linking,
-  Share,
-  StyleSheet,
   Text,
-  ToastAndroid,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import React, {RefObject, memo, useEffect, useMemo, useState} from 'react';
@@ -17,9 +12,6 @@ import MarkdownDisplay from 'react-native-markdown-display';
 import {useTheme} from '../Context/ThemeContext';
 import useChatContext from '../Context/ChatContext';
 import LottieView from 'lottie-react-native';
-import Icon from 'react-native-vector-icons/FontAwesome6';
-import Tts from 'react-native-tts';
-import Clipboard from '@react-native-clipboard/clipboard';
 import {TouchableNativeFeedback} from 'react-native';
 import ActionButtons from './ActionButtons';
 

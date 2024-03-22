@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableHighlight,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
@@ -192,7 +193,9 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
         {
           // Head container
         }
-        <TouchableOpacity
+        <TouchableHighlight
+          activeOpacity={0.6}
+          underlayColor="#DDDDDD55"
           onPress={() => {
             Animated.timing(offsetValue, {
               toValue: showMenu ? 0 : width * 0.8,
@@ -201,20 +204,23 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
             }).start();
             setShowMenu(!showMenu);
           }}
-          style={{paddingHorizontal: 0}}>
+          style={{padding: 10, borderRadius: 10}}>
           {showMenu ? (
             <Icon name={'xmark'} color={colorMode} size={22} />
           ) : (
             <Icon name={'bars'} color={colorMode} size={20} />
           )}
-        </TouchableOpacity>
+        </TouchableHighlight>
         <Text style={[styles.heading, {color: colorMode}]}>
           {title?.split('').slice(0, 27)}
           {title?.length! > 27 && '...'}
         </Text>
-        <TouchableOpacity>
+        <TouchableHighlight
+          style={{padding: 10, borderRadius: 10}}
+          activeOpacity={0.2}
+          underlayColor="#DDDDDD">
           <Icon name={'ellipsis-vertical'} color={colorMode} size={20} />
-        </TouchableOpacity>
+        </TouchableHighlight>
       </View>
 
       {isChatStarted ? (
@@ -375,10 +381,9 @@ const styles = StyleSheet.create({
   headContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
+    paddingHorizontal: 10,
+    paddingBottom: 10,
     alignItems: 'center',
-    
   },
   AskGemini: {
     fontSize: 34,

@@ -4,9 +4,8 @@ import {
   StyleSheet,
   TextInput,
   TextInputContentSizeChangeEventData,
-  TouchableWithoutFeedback,
+  TouchableOpacity,
   View,
-  useColorScheme,
 } from 'react-native';
 import React, {RefObject} from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome6';
@@ -97,42 +96,36 @@ const InputBar: React.FC<InputBarProps> = ({setText, runChat}) => {
         placeholderTextColor={theme === 'dark' ? '#bbb' : '#888'}
       />
       {isLoading ? (
-        <TouchableWithoutFeedback>
-          <Icon 
-            name={'circle-stop'}
+        <Icon
+          name={'circle-stop'}
+          size={20}
+          color={colorMode}
+          style={{paddingRight: 10}}
+        />
+      ) : textInput.trim().length === 0 ? (
+        <TouchableOpacity
+          onPress={toggleKeyboard}
+          style={{padding: 10}}>
+          <Icon
+            name={'keyboard'}
             size={20}
             color={colorMode}
-            style={{paddingRight: 10}}
           />
-        </TouchableWithoutFeedback>
+        </TouchableOpacity>
       ) : (
-        textInput.trim().length === 0 ? (
-          <TouchableWithoutFeedback
-            onPress={toggleKeyboard}
-            style={{padding: 20}}>
-            <Icon
-              name={'keyboard'}
-              size={20}
-              color={colorMode}
-              style={{paddingRight: 10}}
-            />
-          </TouchableWithoutFeedback>
-        ) : (
-          <TouchableWithoutFeedback
-            onPress={() => {
-              runChat();
-              setTextInput('');
-              setInputHeight(50);
-            }}
-            style={{padding: 20}}>
-            <Icon
-              name={'paper-plane'}
-              size={20}
-              color={colorMode}
-              style={{paddingRight: 10}}
-            />
-          </TouchableWithoutFeedback>
-        )
+        <TouchableOpacity
+          onPress={() => {
+            runChat();
+            setTextInput('');
+            setInputHeight(50);
+          }}
+          style={{padding: 10}}>
+          <Icon
+            name={'paper-plane'}
+            size={20}
+            color={colorMode}
+          />
+        </TouchableOpacity>
       )}
     </View>
   );

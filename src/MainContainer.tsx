@@ -1,6 +1,5 @@
 import {
   Animated,
-  Button,
   Dimensions,
   Image,
   SafeAreaView,
