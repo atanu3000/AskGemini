@@ -40,20 +40,15 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
     React.useState<boolean>(false);
   const [chatHistory, setChatHistory] = React.useState<InputContent[]>([]);
   const {theme} = useTheme();
-  const colorMode = theme === 'dark' ? '#fff' : '#000';
+  const colorMode = theme === 'dark' ? '#ddd' : '#000';
   const isDarkTheme = theme === 'dark' ? true : false;
   const scrollViewRef = React.useRef<FlatList<any>>(null);
   const [showGoToBottomButton, setShowGoToBottomButton] =
     React.useState<boolean>(false);
   const [title, setTitle] = React.useState<string>();
   const [currentApiKeyIndex, setCurrentApiKeyIndex] = React.useState<number>(0);
-  const {
-    isChatStarted,
-    setIsChatStarted,
-    showMenu,
-    setShowMenu,
-    setIsLoading,
-  } = useChatContext();
+  const {isChatStarted, setIsChatStarted, showMenu, setShowMenu, setIsLoading} =
+    useChatContext();
 
   React.useEffect(() => {
     const chatCleared = () => {
@@ -101,8 +96,6 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
 
   const API_KEYS = [Google_API_KEY1, Google_API_KEY2];
 
-  // let currentApiKeyIndex = 0;
-
   function getNextApiKey() {
     setCurrentApiKeyIndex((currentApiKeyIndex + 1) % API_KEYS.length);
     return API_KEYS[currentApiKeyIndex];
@@ -118,7 +111,7 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
         textInput;
       const result = await model.generateContent(query);
       const response = result.response;
-      setTitle(response.text());
+      setTitle(response.text().replace(/\*\*/g, '*'));
     } catch (error) {}
   }
 
@@ -126,6 +119,7 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
     await updateChatHistory('user', textInput);
     setIsChatStarted(true);
     setIsLoading(true);
+    handleGoToBottom();
     const api_key = getNextApiKey();
     try {
       const genAI = new GoogleGenerativeAI(api_key);
@@ -174,6 +168,7 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
         generateTitle();
       }
       setIsLoading(false);
+      handleGoToBottom();
     }
   }
 
@@ -230,7 +225,7 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
         />
       ) : (
         <ScrollView
-          contentContainerStyle={{paddingBottom: 100}}
+          contentContainerStyle={{paddingBottom: 100, paddingHorizontal: 10}}
           showsVerticalScrollIndicator={false}>
           <View style={{alignItems: 'center', alignSelf: 'center'}}>
             <Image source={modelImage} style={{height: 55, width: 55}} />
@@ -380,9 +375,10 @@ const styles = StyleSheet.create({
   headContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 5,
+    paddingHorizontal: 15,
     paddingVertical: 10,
     alignItems: 'center',
+    
   },
   AskGemini: {
     fontSize: 34,
@@ -430,6 +426,7 @@ const styles = StyleSheet.create({
     gap: 10,
     width: '100%',
     alignSelf: 'center',
+    paddingHorizontal: 10,
   },
   goToBottomButton: {
     alignSelf: 'center',

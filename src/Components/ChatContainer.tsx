@@ -1,11 +1,27 @@
-import {Dimensions, FlatList, Image, Text, View} from 'react-native';
-import React, {RefObject, memo, useMemo} from 'react';
+import {
+  Dimensions,
+  FlatList,
+  Image,
+  Linking,
+  Share,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import React, {RefObject, memo, useEffect, useMemo, useState} from 'react';
 import {InputContent} from '@google/generative-ai';
 import getMarkdownStyle from '../markdownStyle';
 import MarkdownDisplay from 'react-native-markdown-display';
 import {useTheme} from '../Context/ThemeContext';
 import useChatContext from '../Context/ChatContext';
 import LottieView from 'lottie-react-native';
+import Icon from 'react-native-vector-icons/FontAwesome6';
+import Tts from 'react-native-tts';
+import Clipboard from '@react-native-clipboard/clipboard';
+import {TouchableNativeFeedback} from 'react-native';
+import ActionButtons from './ActionButtons';
 
 interface ChatContainerProps {
   chat: InputContent[];
@@ -40,70 +56,91 @@ const addSpacesToCodeBlocks = (text: string): string => {
 
 const ChatItem: React.FC<{
   item: InputContent;
+  onPress: () => void;
+  isButtonsVisible: boolean;
   colorMode: string;
   markdownStyle: any;
-}> = React.memo(({item, colorMode, markdownStyle}) => {
-  const userImage = useMemo(() => require('../../src/assets/user.png'), []);
-  const modelImage = useMemo(
-    () => require('../../android/app/src/main/res/mipmap-hdpi/ic_launcher.png'),
-    [],
-  );
-  const imageSrc = item.role === 'user' ? userImage : modelImage;
-  const role = item.role === 'user' ? 'You' : 'AskGemini';
-  const {width} = Dimensions.get('window');
+}> = React.memo(
+  ({item, onPress, isButtonsVisible, colorMode, markdownStyle}) => {
+    const userImage = useMemo(() => require('../../src/assets/user.png'), []);
+    const modelImage = useMemo(
+      () =>
+        require('../../android/app/src/main/res/mipmap-hdpi/ic_launcher.png'),
+      [],
+    );
+    const imageSrc = item.role === 'user' ? userImage : modelImage;
+    const role = item.role === 'user' ? 'You' : 'AskGemini';
+    const {width} = Dimensions.get('window');
+    
 
-  return (
-    <View style={{marginVertical: 0, marginTop: 0, }}>
-      <View style={{flexDirection: 'row', gap: 10, marginBottom: 5}}>
-        <Image source={imageSrc} style={{height: 27, width: 27}} />
-        <View style={{width: width * 0.846}}>
-          <Text style={{color: colorMode, fontWeight: '500', fontSize: 16}}>
-            {role}
-          </Text>
-          <MarkdownDisplay style={markdownStyle}>
-            {addSpacesToCodeBlocks(
-              item.parts.toString().replace(/```/g, '\n`\n\n'),
-            )}
-          </MarkdownDisplay>
-        </View>
+    return (
+      <View style={{marginVertical: 0, marginTop: 0}}>
+        <TouchableNativeFeedback
+          onPress={onPress}
+          background={TouchableNativeFeedback.Ripple('#81aef733', false)}>
+          <View style={{flexDirection: 'row', gap: 10, marginBottom: 5, paddingHorizontal: 10}}>
+            <Image source={imageSrc} style={{height: 27, width: 27}} />
+            <View style={{width: width * 0.846}}>
+              <Text style={{color: colorMode, fontWeight: '500', fontSize: 16}}>
+                {role}
+              </Text>
+              <MarkdownDisplay style={markdownStyle}>
+                {addSpacesToCodeBlocks(
+                  item.parts.toString().replace(/```/g, '\n`\n\n'),
+                )}
+              </MarkdownDisplay>
+            </View>
+          </View>
+        </TouchableNativeFeedback>
+        {isButtonsVisible ? (
+          <ActionButtons 
+            text={item.parts.toString()}
+            colorMode={colorMode}
+            role={role}
+          />
+        ) : (
+          <View style={{paddingVertical: 21.2}}></View>
+        )}
       </View>
-    </View>
-  );
-});
+    );
+  },
+);
 
 const ChatContainer: React.FC<ChatContainerProps> = React.memo(
   ({chat, scrollRef, handleScroll}) => {
     const {theme} = useTheme();
-
-    const colorMode = theme === 'dark' ? '#fff' : '#000';
+    const [isSelected, setIsSelected] = useState<number | null>(chat.length -1);
+    const colorMode = theme === 'dark' ? '#ddd' : '#000';
     const markdownStyle = getMarkdownStyle();
     const {isLoading} = useChatContext();
 
     return (
-      <View style={{maxHeight: '86%',paddingBottom: 0}}>
+      <View style={{maxHeight: '86%'}}>
         <FlatList
           data={chat}
           ref={scrollRef}
           onScroll={handleScroll}
-          contentContainerStyle={{paddingBottom: 30, width: '100%',}}
+          contentContainerStyle={{paddingBottom: 30, width: '100%', marginTop: 20}}
           showsVerticalScrollIndicator={false}
-          renderItem={({item}) => (
+          renderItem={({item, index}) => (
             <ChatItem
               item={item}
+              onPress={() => setIsSelected(index)}
+              isButtonsVisible={isSelected === index ? true : false}
               colorMode={colorMode}
               markdownStyle={markdownStyle}
             />
           )}
           keyExtractor={(item, index) => index.toString()}
         />
-        <View style={{ paddingLeft: 35}}>
+        <View style={{paddingLeft: 35}}>
           {isLoading && (
-          <LottieView
-            source={require('../assets/typing-animation2.json')}
-            style={{width: 60, height: 40}}
-            autoPlay
-            loop
-          />
+            <LottieView
+              source={require('../assets/typing-animation2.json')}
+              style={{width: 60, height: 40}}
+              autoPlay
+              loop
+            />
           )}
         </View>
       </View>

@@ -46,7 +46,7 @@ const MainContainer = () => {
         styles.menuContainer,
         {backgroundColor: !isDarkTheme ? '#6a97f7' : '#1e2b47'},
       ]}>
-      <StatusBar backgroundColor={ThemeColor} barStyle={barStyle} />
+      <StatusBar animated backgroundColor={ThemeColor} barStyle={barStyle} />
       <View style={{height: '100%', justifyContent: 'space-between'}}>
         <View>
           <TouchableWithoutFeedback>
@@ -149,7 +149,6 @@ const styles = StyleSheet.create({
     height: '100%',
     width: '100%',
     flex: 1,
-    paddingHorizontal: 10,
   },
   themeButton: {
     paddingVertical: 10,
