@@ -12,9 +12,10 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import InputBar from '../Components/InputBar';
 import Icon from 'react-native-vector-icons/FontAwesome6';
+import { Image as ImageType } from 'react-native-image-crop-picker';
 
 //generative AI impports
 import {
@@ -28,6 +29,7 @@ import ChatContainer from '../Components/ChatContainer';
 import useChatContext from '../Context/ChatContext';
 import suggestions from '../assets/suggestions';
 import {useTheme} from '../Context/ThemeContext';
+import ImageOptions from '../Components/ImageOptions';
 
 interface AnimationProps {
   offsetValue: Animated.Value;
@@ -36,20 +38,21 @@ interface AnimationProps {
 }
 
 const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
-  const [textInput, setTextInput] = React.useState<string>('');
-  const [isSuggestionChat, setIsSuggestionChat] =
-    React.useState<boolean>(false);
-  const [chatHistory, setChatHistory] = React.useState<InputContent[]>([]);
+  const [textInput, setTextInput] = useState<string>('');
+  const [selectedImage, setSelectedImage] = useState<ImageType>();
+  const [isSuggestionChat, setIsSuggestionChat] = useState<boolean>(false);
+  const [chatHistory, setChatHistory] = useState<InputContent[]>([]);
   const {theme} = useTheme();
   const colorMode = theme === 'dark' ? '#ddd' : '#000';
   const isDarkTheme = theme === 'dark' ? true : false;
   const scrollViewRef = React.useRef<FlatList<any>>(null);
   const [showGoToBottomButton, setShowGoToBottomButton] =
-    React.useState<boolean>(false);
-  const [title, setTitle] = React.useState<string>();
-  const [currentApiKeyIndex, setCurrentApiKeyIndex] = React.useState<number>(0);
+    useState<boolean>(false);
+  const [title, setTitle] = useState<string>();
+  const [currentApiKeyIndex, setCurrentApiKeyIndex] = useState<number>(0);
   const {isChatStarted, setIsChatStarted, showMenu, setShowMenu, setIsLoading} =
     useChatContext();
+  const [dialogVisible, setDialogVisible] = useState<boolean>(false);
 
   React.useEffect(() => {
     const chatCleared = () => {
@@ -112,7 +115,7 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
         textInput;
       const result = await model.generateContent(query);
       const response = result.response;
-      setTitle(response.text().replace(/\*\*/g, '*'));
+      setTitle(response.text().replace(/\*\*/g, ''));
     } catch (error) {}
   }
 
@@ -222,6 +225,12 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
           <Icon name={'ellipsis-vertical'} color={colorMode} size={20} />
         </TouchableHighlight>
       </View>
+
+      <ImageOptions
+        visible={dialogVisible}
+        setImage={setSelectedImage}
+        onClose={() => setDialogVisible(!dialogVisible)}
+      />
 
       {isChatStarted ? (
         <ChatContainer
@@ -364,7 +373,13 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
               <Icon name="angles-down" color={'#222'} size={16} />
             </TouchableOpacity>
           )}
-          <InputBar setText={setTextInput} runChat={runChat} />
+          <InputBar
+            setText={setTextInput}
+            setDialogVisible={setDialogVisible}
+            image={selectedImage}
+            cancelImage={setSelectedImage}
+            runChat={runChat}
+          />
         </View>
       </View>
     </KeyboardAvoidingView>
