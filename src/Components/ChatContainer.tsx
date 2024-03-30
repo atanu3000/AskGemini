@@ -1,11 +1,5 @@
-import {
-  Dimensions,
-  FlatList,
-  Image,
-  Text,
-  View,
-} from 'react-native';
-import React, {RefObject, memo, useEffect, useMemo, useState} from 'react';
+import {Dimensions, FlatList, Image, Text, View} from 'react-native';
+import React, {RefObject, memo, useMemo, useState} from 'react';
 import {InputContent} from '@google/generative-ai';
 import getMarkdownStyle from '../markdownStyle';
 import MarkdownDisplay from 'react-native-markdown-display';
@@ -26,6 +20,13 @@ interface ChatContainerProps {
     };
   }) => void;
 }
+
+const extractImagePath = (text: string): string => {
+  const imagePathRegex = /(file:\/\/\/.*?\.jpg)/;
+  const match = text.match(imagePathRegex);
+  const imagePath = match ? match[0] : '';
+  return imagePath;
+};
 
 const addSpacesToCodeBlocks = (text: string): string => {
   const lines = text.split(/\n/);
@@ -63,29 +64,47 @@ const ChatItem: React.FC<{
     const imageSrc = item.role === 'user' ? userImage : modelImage;
     const role = item.role === 'user' ? 'You' : 'AskGemini';
     const {width} = Dimensions.get('window');
-    
-
+    const path = extractImagePath(item.parts.toString());
     return (
       <View style={{marginVertical: 0, marginTop: 0}}>
         <TouchableNativeFeedback
           onPress={onPress}
           background={TouchableNativeFeedback.Ripple('#81aef733', false)}>
-          <View style={{flexDirection: 'row', gap: 10, marginBottom: 5, paddingHorizontal: 10}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              gap: 10,
+              marginBottom: 5,
+              paddingHorizontal: 10,
+            }}>
             <Image source={imageSrc} style={{height: 27, width: 27}} />
             <View style={{width: width * 0.846}}>
               <Text style={{color: colorMode, fontWeight: '500', fontSize: 16}}>
                 {role}
               </Text>
+              {path && (
+                <Image
+                  source={{uri: path}}
+                  style={{
+                    width: 230,
+                    height: 150,
+                    borderRadius: 15,
+                    marginTop: 10,
+                  }}
+                />
+              )}
               <MarkdownDisplay style={markdownStyle}>
-                {addSpacesToCodeBlocks(
-                  item.parts.toString().replace(/```/g, '\n`\n\n'),
-                )}
+                {role === 'You'
+                  ? item.parts.toString().replace(path, '')
+                  : addSpacesToCodeBlocks(
+                      item.parts.toString().replace(/```/g, '\n`\n\n'),
+                    )}
               </MarkdownDisplay>
             </View>
           </View>
         </TouchableNativeFeedback>
         {isButtonsVisible ? (
-          <ActionButtons 
+          <ActionButtons
             text={item.parts.toString()}
             colorMode={colorMode}
             role={role}
@@ -101,7 +120,9 @@ const ChatItem: React.FC<{
 const ChatContainer: React.FC<ChatContainerProps> = React.memo(
   ({chat, scrollRef, handleScroll}) => {
     const {theme} = useTheme();
-    const [isSelected, setIsSelected] = useState<number | null>(chat.length -1);
+    const [isSelected, setIsSelected] = useState<number | null>(
+      chat.length - 1,
+    );
     const colorMode = theme === 'dark' ? '#ddd' : '#000';
     const markdownStyle = getMarkdownStyle();
     const {isLoading} = useChatContext();
@@ -112,7 +133,11 @@ const ChatContainer: React.FC<ChatContainerProps> = React.memo(
           data={chat}
           ref={scrollRef}
           onScroll={handleScroll}
-          contentContainerStyle={{paddingBottom: 30, width: '100%', marginTop: 20}}
+          contentContainerStyle={{
+            paddingBottom: 30,
+            width: '100%',
+            marginTop: 20,
+          }}
           showsVerticalScrollIndicator={false}
           renderItem={({item, index}) => (
             <ChatItem

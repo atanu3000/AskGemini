@@ -15,7 +15,8 @@ import {
 import React, {useState} from 'react';
 import InputBar from '../Components/InputBar';
 import Icon from 'react-native-vector-icons/FontAwesome6';
-import { Image as ImageType } from 'react-native-image-crop-picker';
+import {Image as ImageType} from 'react-native-image-crop-picker';
+import RNFS from 'react-native-fs';
 
 //generative AI impports
 import {
@@ -119,6 +120,32 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
     } catch (error) {}
   }
 
+  const generationConfig = {
+    temperature: 0.9,
+    topK: 1,
+    topP: 1,
+    maxOutputTokens: 2048,
+  };
+
+  const safetySettings = [
+    {
+      category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+  ];
+
   async function runChat() {
     await updateChatHistory('user', textInput);
     setIsChatStarted(true);
@@ -129,32 +156,6 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
       const genAI = new GoogleGenerativeAI(api_key);
       const model = genAI.getGenerativeModel({model: 'gemini-pro'});
 
-      const generationConfig = {
-        temperature: 0.9,
-        topK: 1,
-        topP: 1,
-        maxOutputTokens: 2048,
-      };
-
-      const safetySettings = [
-        {
-          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-          threshold: HarmBlockThreshold.BLOCK_NONE,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-      ];
-
       const chat = model.startChat({
         generationConfig,
         safetySettings,
@@ -162,6 +163,61 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
       });
 
       const result = await chat.sendMessage(textInput!);
+      const response = result.response;
+      updateChatHistory('model', response.text());
+    } catch (error) {
+      console.log(error);
+      updateChatHistory('model', 'Something went wrong. Please try again');
+    } finally {
+      if (!isChatStarted) {
+        generateTitle();
+      }
+      setIsLoading(false);
+      handleGoToBottom();
+    }
+  }
+
+  // Converts local file information to a GoogleGenerativeAI.Part object.
+  async function fileToGenerativePart(path: string, mimeType: string) {
+    try {
+      const fileContent = await RNFS.readFile(path, 'base64');
+      return {
+        inlineData: {
+          data: fileContent,
+          mimeType,
+        },
+      };
+    } catch (error) {
+      console.error('Error reading file:', error);
+      throw error;
+    }
+  }
+
+  async function genImgResponse() {
+    await updateChatHistory('user', selectedImage!.path + textInput);
+    setIsChatStarted(true);
+    setIsLoading(true);
+    handleGoToBottom();
+    const api_key = getNextApiKey();
+    try {
+      const genAI = new GoogleGenerativeAI(api_key);
+
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-pro-vision',
+        safetySettings,
+        generationConfig,
+      });
+
+      const part = await fileToGenerativePart(
+        selectedImage!.path,
+        selectedImage!.mime,
+      );
+
+      const query =
+        'Understand this image carefully and answer the following question: ' +
+        textInput;
+
+      const result = await model.generateContent([query, part]);
       const response = result.response;
       updateChatHistory('model', response.text());
     } catch (error) {
@@ -379,6 +435,7 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
             image={selectedImage}
             cancelImage={setSelectedImage}
             runChat={runChat}
+            genImgResponse={genImgResponse}
           />
         </View>
       </View>

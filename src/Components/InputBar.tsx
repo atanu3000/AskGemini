@@ -20,6 +20,7 @@ interface InputBarProps {
   image: ImageType | undefined;
   cancelImage: React.Dispatch<React.SetStateAction<ImageType | undefined>>;
   runChat: () => void;
+  genImgResponse: () => void;
 }
 
 const InputBar: React.FC<InputBarProps> = ({
@@ -28,6 +29,7 @@ const InputBar: React.FC<InputBarProps> = ({
   image,
   cancelImage,
   runChat,
+  genImgResponse,
 }) => {
   const [textInput, setTextInput] = useState<string>('');
   const [marginBottom, setMarginBottom] = useState<number>(0);
@@ -36,7 +38,6 @@ const InputBar: React.FC<InputBarProps> = ({
   const {theme} = useTheme();
   const colorMode = theme === 'dark' ? '#fff' : '#000';
   const Themecolor = theme === 'dark' ? '#383838' : '#ffffff';
-  // const [selectedImage, setSelectedImage] = useState<ImageType>();
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -144,7 +145,12 @@ const InputBar: React.FC<InputBarProps> = ({
               <TouchableOpacity
                 disabled={!isTextEnter}
                 onPress={() => {
-                  runChat();
+                  if (image) {
+                    cancelImage(undefined);
+                    genImgResponse();
+                  } else {
+                    runChat();
+                  }
                   setTextInput('');
                   setInputHeight(50);
                 }}
