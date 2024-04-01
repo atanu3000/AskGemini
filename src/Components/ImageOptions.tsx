@@ -1,5 +1,4 @@
 import {
-    Dimensions,
   StatusBar,
   StyleSheet,
   Text,
@@ -86,7 +85,6 @@ const styles = StyleSheet.create({
     height: '100%',
     width: '100%',
     backgroundColor: '#00000066',
-    // backgroundColor: '#ccc',
   },
   popup: {
     position: 'absolute',

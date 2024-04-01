@@ -31,6 +31,7 @@ import useChatContext from '../Context/ChatContext';
 import suggestions from '../assets/suggestions';
 import {useTheme} from '../Context/ThemeContext';
 import ImageOptions from '../Components/ImageOptions';
+import MenuContainer from '../Components/MenuContainer';
 
 interface AnimationProps {
   offsetValue: Animated.Value;
@@ -54,6 +55,8 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
   const {isChatStarted, setIsChatStarted, showMenu, setShowMenu, setIsLoading} =
     useChatContext();
   const [dialogVisible, setDialogVisible] = useState<boolean>(false);
+  const [menuContainerVisible, setMenuContainerVisible] =
+    useState<boolean>(false); // TODO: move this as context level state
 
   React.useEffect(() => {
     const chatCleared = () => {
@@ -275,12 +278,23 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
           {title?.length! > 27 && '...'}
         </Text>
         <TouchableHighlight
-          style={{padding: 10, borderRadius: 10}}
           activeOpacity={0.2}
-          underlayColor="#DDDDDD">
+          underlayColor="#DDDDDD55"
+          onPress={() => setMenuContainerVisible(!menuContainerVisible)}
+          style={{
+            padding: 10,
+            borderRadius: 10,
+            paddingHorizontal: 12,
+            backgroundColor: menuContainerVisible ? '#CCCCCC55' : 'transparent',
+          }}>
           <Icon name={'ellipsis-vertical'} color={colorMode} size={20} />
         </TouchableHighlight>
       </View>
+
+      <MenuContainer
+        isVisible={menuContainerVisible}
+        onClose={() => setMenuContainerVisible(!menuContainerVisible)}
+      />
 
       <ImageOptions
         visible={dialogVisible}
