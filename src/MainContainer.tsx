@@ -10,34 +10,51 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import ChatScreen from './Screens/ChatScreen';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import useChatContext from './Context/ChatContext';
-import ThemeDialog from './Components/ThemeDialog';
 import {useTheme} from './Context/ThemeContext';
+import {useAppwrite} from './appwrite/AppwriteContext';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {AppStackParamList} from './routes/AppStack';
 
-const MainContainer = () => {
-  const {theme, mode} = useTheme();
+export type userObj = {
+  name: string;
+  email: string;
+};
+
+type ScreenProps = NativeStackScreenProps<AppStackParamList, 'MainContainer'>;
+
+const MainContainer = ({navigation}: ScreenProps) => {
+  const {theme} = useTheme();
   const isDarkTheme = theme === 'dark' ? true : false;
   const ThemeColor = !isDarkTheme ? '#fff' : '#212121';
   const FontColor = !isDarkTheme ? '#212121' : '#fff';
   const barStyle = !isDarkTheme ? 'dark-content' : 'light-content';
-  const {width} = Dimensions.get('window');  
+  const {width} = Dimensions.get('window');
 
   const offsetValue = React.useRef(new Animated.Value(0)).current;
   const modelImage = require('../android/app/src/main/res/mipmap-hdpi/ic_launcher.png');
   const {setIsChatStarted, showMenu, setShowMenu, isLoading} = useChatContext();
 
-  const [dialogVisible, setDialogVisible] = React.useState(false);
-  const toggleDialog = () => {
-    setDialogVisible(prevState => !prevState);
-  };
-  
-  const capitalizeFirstLetter = (str: string) => {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  };
+  const {appwrite, setIsLogedin} = useAppwrite();
+  const [userData, setUserData] = useState<userObj>();
+
+  useEffect(() => {
+    appwrite.GetCurrentUser().then(response => {
+      if (response) {
+        const user: userObj = {
+          name: response.name,
+          email: response.email,
+        };
+        setUserData(user);
+      }
+    });
+  }, [appwrite]);
+
+
 
   return (
     <SafeAreaView
@@ -63,7 +80,7 @@ const MainContainer = () => {
               !isLoading && setIsChatStarted(false);
               setShowMenu(false);
               Animated.timing(offsetValue, {
-                toValue: showMenu ? 0 : width*0.8,
+                toValue: showMenu ? 0 : width * 0.8,
                 duration: 300,
                 useNativeDriver: true,
               }).start();
@@ -78,28 +95,35 @@ const MainContainer = () => {
             </View>
           </TouchableWithoutFeedback>
         </View>
+
         <TouchableOpacity
-          onPress={toggleDialog}
+          onPress={() => {
+            navigation.navigate('Settings')
+            Animated.timing(offsetValue, {
+              toValue: showMenu ? 0 : width * 0.8,
+              duration: 300,
+              useNativeDriver: true,
+            }).start();
+            setShowMenu(!showMenu);
+          }}
           style={[
             styles.themeButton,
             {backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675'},
           ]}>
-          <View>
-            <View style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
-              <Icon
-                name={'circle-half-stroke'}
-                color={FontColor}
-                size={20}
-                style={{paddingTop: 5}}
-              />
-              <Text style={{color: FontColor, fontSize: 14}}>Theme</Text>
+          <View style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
+            <Icon name={'circle-user'} solid size={35} color={FontColor} />
+            <View>
+              <Text style={{color: FontColor, fontSize: 16, fontWeight: '500'}}>{userData?.name}</Text>
+              <Text style={{color: FontColor}}>
+                {userData?.email.split('').slice(0, 17)}
+                {userData?.email.length! > 17 && '...'}
+              </Text>
             </View>
-            <Text style={{color: FontColor, paddingLeft: 35}}>
-              {capitalizeFirstLetter(mode)}
-            </Text>
+            <Icon name={'ellipsis-vertical'} color={FontColor} size={20} />
           </View>
         </TouchableOpacity>
-        <ThemeDialog visible={dialogVisible} onClose={toggleDialog} />
+
+        
       </View>
       <Animated.View
         style={{

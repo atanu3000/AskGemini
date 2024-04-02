@@ -1,14 +1,17 @@
 import React from 'react';
 import ChatProvider from './Context/ChatProvider';
-import MainContainer from './MainContainer';
 import {ThemeProvider} from './Context/ThemeContext';
+import {AppwriteProvider} from './appwrite/AppwriteContext';
+import { Router } from './routes/Router';
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <ChatProvider>
-        <MainContainer />
-      </ChatProvider>
-    </ThemeProvider>
+    <AppwriteProvider>
+      <ThemeProvider>
+        <ChatProvider>
+          <Router />
+        </ChatProvider>
+      </ThemeProvider>
+    </AppwriteProvider>
   );
 }
