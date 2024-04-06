@@ -26,6 +26,9 @@ export const Router = () => {
       .catch(_ => {
         setIsLoading(false);
         setIsLogedin(false);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }, [appwrite, setIsLogedin]);
 
