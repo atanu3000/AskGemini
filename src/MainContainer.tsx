@@ -54,8 +54,6 @@ const MainContainer = ({navigation}: ScreenProps) => {
     });
   }, [appwrite]);
 
-
-
   return (
     <SafeAreaView
       style={[
@@ -98,7 +96,7 @@ const MainContainer = ({navigation}: ScreenProps) => {
 
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('Settings')
+            navigation.navigate('Settings');
             Animated.timing(offsetValue, {
               toValue: showMenu ? 0 : width * 0.8,
               duration: 300,
@@ -110,20 +108,28 @@ const MainContainer = ({navigation}: ScreenProps) => {
             styles.themeButton,
             {backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675'},
           ]}>
-          <View style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
-            <Icon name={'circle-user'} solid size={35} color={FontColor} />
-            <View>
-              <Text style={{color: FontColor, fontSize: 16, fontWeight: '500'}}>{userData?.name}</Text>
-              <Text style={{color: FontColor}}>
-                {userData?.email.split('').slice(0, 17)}
-                {userData?.email.length! > 17 && '...'}
-              </Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}>
+            <View style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
+              <Icon name={'circle-user'} solid size={35} color={FontColor} />
+              <View>
+                <Text
+                  style={{color: FontColor, fontSize: 16, fontWeight: '500'}}>
+                  {userData?.name}
+                </Text>
+                <Text style={{color: FontColor}}>
+                  {userData?.email.split('').slice(0, 17)}
+                  {userData?.email.length! > 17 && '...'}
+                </Text>
+              </View>
             </View>
             <Icon name={'ellipsis-vertical'} color={FontColor} size={20} />
           </View>
         </TouchableOpacity>
-
-        
       </View>
       <Animated.View
         style={{
@@ -179,7 +185,7 @@ const styles = StyleSheet.create({
     width: '75%',
     marginHorizontal: 10,
     borderRadius: 20,
-    paddingLeft: 25,
+    paddingHorizontal: 25,
   },
 });
 

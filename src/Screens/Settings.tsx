@@ -46,7 +46,7 @@ const Settings = () => {
   const handleLogout = () => {
     appwrite.LogoutUser().then(() => {
       setIsLogedin(false);
-      ToastAndroid.show('Logged out', ToastAndroid.SHORT);
+      ToastAndroid.show('Good bye '+userData?.name.split(' ')[0], ToastAndroid.SHORT);
     });
   };
 
@@ -136,7 +136,7 @@ const Settings = () => {
             <Text style={{color: FontColor, fontSize: 16}}>
               AskGemini for Andriod
             </Text>
-            <Text>1.0.0</Text>
+            <Text style={{color: FontColor}}>1.0.0</Text>
           </View>
         </View>
         <TouchableOpacity style={{paddingBottom: 100}} onPress={handleLogout}>

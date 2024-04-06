@@ -7,6 +7,8 @@ import {
   Pressable,
   Platform,
   StatusBar,
+  ToastAndroid,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import React, {useState} from 'react';
 
@@ -14,21 +16,33 @@ import React, {useState} from 'react';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {AuthStackParamList} from '../routes/AuthStack';
 import {useAppwrite} from '../appwrite/AppwriteContext';
+import Loading from '../Components/Loading';
+import {useTheme} from '../Context/ThemeContext';
+import LinearGradient from 'react-native-linear-gradient';
+import Icon from 'react-native-vector-icons/FontAwesome6';
+import LottieView from 'lottie-react-native';
 
 type LoginScreenProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
 const Login = ({navigation}: LoginScreenProps) => {
+  const {theme} = useTheme();
+  const ThemeColor = theme === 'dark' ? '#212121' : '#fff';
+  const FontColor = theme === 'dark' ? '#ddd' : '#333';
+  const barStyle = theme === 'dark' ? 'light-content' : 'dark-content';
   const {appwrite, setIsLogedin} = useAppwrite();
 
   const [error, setError] = useState<string>('');
 
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isPasswordHide, setIsPasswordHide] = useState<boolean>(true);
 
   const handleLogin = () => {
     if (email.length < 1 || password.length < 1) {
       setError('All fields are required');
     } else {
+      setIsLoading(true);
       const user = {
         email,
         password,
@@ -38,95 +52,139 @@ const Login = ({navigation}: LoginScreenProps) => {
         .LoginAccount(user)
         .then(response => {
           if (response) {
+            setIsLoading(false);
             setIsLogedin(true);
           }
         })
         .catch(e => {
           console.log(e);
           setError('Incorrect email or password');
+        })
+        .finally(() => {
+          ToastAndroid.show('Welcome to AskGemini', ToastAndroid.SHORT);
         });
     }
   };
-  
+
+  if (isLoading) return <Loading />;
+
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}>
-      <StatusBar backgroundColor={'#fff'} barStyle={'dark-content'} />
-      <View style={styles.formContainer}>
-        <Text style={styles.appName}>Appwrite Auth</Text>
+    <LinearGradient
+      colors={['#ffffff00', '#a7c2fc77']}
+      style={[styles.container, {backgroundColor: ThemeColor}]}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}>
+        <StatusBar backgroundColor={ThemeColor} barStyle={barStyle} />
+        <View style={styles.formContainer}>
+          <View style={styles.headContainer}>
+            <View style={{width: '50%'}}>
+              <Text style={{fontSize: 36, fontWeight: '500', color: FontColor}}>
+                Sign in
+              </Text>
+              <Text style={{fontSize: 16, color: FontColor}}>
+                Access to your account
+              </Text>
+            </View>
+            <LottieView
+              source={require('../assets/signin-animation.json')}
+              style={{height: 220, width: 220}}
+              autoPlay
+              loop
+            />
+          </View>
 
-        {/* Email */}
-        <TextInput
-          keyboardType="email-address"
-          value={email}
-          onChangeText={text => setEmail(text)}
-          placeholderTextColor={'#AEAEAE'}
-          placeholder="Email"
-          style={styles.input}
-        />
+          {/* Email */}
+          <View style={[styles.inputBar, {backgroundColor: ThemeColor}]}>
+            <Icon name={'envelope'} size={20} color={FontColor} />
+            <TextInput
+              keyboardType="email-address"
+              value={email}
+              onChangeText={text => setEmail(text)}
+              placeholderTextColor={'#AEAEAE'}
+              placeholder="Email"
+              style={styles.input}
+            />
+          </View>
 
-        {/* Password */}
-        <TextInput
-          value={password}
-          onChangeText={text => setPassword(text)}
-          placeholderTextColor={'#AEAEAE'}
-          placeholder="Password"
-          style={styles.input}
-          secureTextEntry
-        />
+          {/* Password */}
+          <View style={[styles.inputBar, {backgroundColor: ThemeColor}]}>
+            <Icon name={'lock'} size={20} color={FontColor} />
+            <TextInput
+              value={password}
+              onChangeText={text => setPassword(text)}
+              placeholderTextColor={'#AEAEAE'}
+              placeholder="Password"
+              style={[styles.input, {color: FontColor}]}
+              secureTextEntry={isPasswordHide}
+            />
+            <TouchableWithoutFeedback
+              onPress={() => setIsPasswordHide(!isPasswordHide)}>
+              <Icon
+                name={isPasswordHide ? 'eye' : 'eye-slash'}
+                size={20}
+                color={FontColor}
+              />
+            </TouchableWithoutFeedback>
+          </View>
 
-        {/* Validation error */}
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          {/* Validation error */}
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-        {/* Login button */}
-        <Pressable
-          onPress={handleLogin}
-          style={[styles.btn, {marginTop: error ? 10 : 20}]}>
-          <Text style={styles.btnText}>Login</Text>
-        </Pressable>
+          {/* Login button */}
+          <Pressable
+            onPress={handleLogin}
+            style={[styles.btn, {marginTop: error ? 15 : 30}]}>
+            <Text style={styles.btnText}>Sign in</Text>
+          </Pressable>
 
-        {/* Sign up navigation */}
-        <Pressable
-          onPress={() => navigation.navigate('Signup')}
-          style={styles.signUpContainer}>
-          <Text style={styles.noAccountLabel}>
-            Don't have an account?{'  '}
-            <Text style={styles.signUpLabel}>Create an account</Text>
-          </Text>
-        </Pressable>
-      </View>
-    </KeyboardAvoidingView>
+          {/* Sign up navigation */}
+          <Pressable
+            onPress={() => navigation.navigate('Signup')}
+            style={styles.signUpContainer}>
+            <Text style={[styles.noAccountLabel, {color: FontColor}]}>
+              Don't have an account?{'  '}
+              <Text style={styles.signUpLabel}>Create an account</Text>
+            </Text>
+          </Pressable>
+        </View>
+      </KeyboardAvoidingView>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   formContainer: {
     justifyContent: 'center',
     alignContent: 'center',
     height: '100%',
   },
-  appName: {
-    color: '#f02e65',
-    fontSize: 40,
-    fontWeight: 'bold',
+  headContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '80%',
     alignSelf: 'center',
-    marginBottom: 20,
+    paddingHorizontal: 5,
+    position: 'relative',
+    bottom: -20,
+    alignItems: 'center',
   },
   input: {
-    backgroundColor: '#fef8fa',
-    padding: 10,
-    height: 40,
+    flex: 1,
+    paddingHorizontal: 12,
+  },
+  inputBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    height: 60,
     alignSelf: 'center',
-    borderRadius: 5,
-
+    borderRadius: 10,
     width: '80%',
-    color: '#000000',
-
     marginTop: 10,
     shadowColor: '#000',
     shadowOffset: {
@@ -135,21 +193,20 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.23,
     shadowRadius: 2.62,
-
     elevation: 1,
   },
   errorText: {
     color: 'red',
     alignSelf: 'center',
-    marginTop: 10,
+    marginTop: 15,
   },
   btn: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#4287f5',
     padding: 10,
-    height: 45,
-
+    height: 60,
+    justifyContent: 'center',
     alignSelf: 'center',
-    borderRadius: 5,
+    borderRadius: 10,
     width: '80%',
     marginTop: 20,
 
@@ -164,7 +221,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   btnText: {
-    color: '#484848',
+    color: '#fff',
     alignSelf: 'center',
     fontWeight: 'bold',
     fontSize: 18,
@@ -173,9 +230,8 @@ const styles = StyleSheet.create({
     marginTop: 80,
   },
   noAccountLabel: {
-    color: '#484848',
     alignSelf: 'center',
-    fontWeight: 'bold',
+    fontWeight: '500',
     fontSize: 15,
   },
   signUpLabel: {

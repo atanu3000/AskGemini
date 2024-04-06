@@ -19,7 +19,6 @@ export const AppStack = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerTitleAlign: 'center',
         headerBackTitleVisible: false,
       }}>
       <Stack.Screen

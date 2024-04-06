@@ -50,11 +50,11 @@ class AppwriteService {
     }
 
     async LoginAccount({ email, password }: LoginUserAccount) {
-        try {
+        // try {
             return await this.account.createEmailPasswordSession(email, password);
-        } catch (error) {
-            console.log("Appwrite :: LoginAccount() error: " + error);
-        }
+        // } catch (error) {
+        //     console.log("Appwrite :: LoginAccount() error: " + error);
+        // }
     }
 
     async GetCurrentUser() {

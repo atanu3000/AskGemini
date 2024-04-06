@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableHighlight,
   TouchableOpacity,
   TouchableWithoutFeedback,
@@ -48,6 +49,7 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
   const colorMode = theme === 'dark' ? '#ddd' : '#000';
   const isDarkTheme = theme === 'dark' ? true : false;
   const scrollViewRef = React.useRef<FlatList<any>>(null);
+  const textInputRef = React.useRef<TextInput>(null);
   const [showGoToBottomButton, setShowGoToBottomButton] =
     useState<boolean>(false);
   const [title, setTitle] = useState<string>();
@@ -264,7 +266,9 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
               duration: 300,
               useNativeDriver: true,
             }).start();
+            textInputRef.current?.blur();
             setShowMenu(!showMenu);
+            setMenuContainerVisible(false);
           }}
           style={{padding: 10, borderRadius: 10}}>
           {showMenu ? (
@@ -444,6 +448,7 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
             </TouchableOpacity>
           )}
           <InputBar
+            textInputRef={textInputRef}
             setText={setTextInput}
             setDialogVisible={setDialogVisible}
             image={selectedImage}

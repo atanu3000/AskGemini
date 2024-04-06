@@ -15,6 +15,7 @@ import useChatContext from '../Context/ChatContext';
 import {Image as ImageType} from 'react-native-image-crop-picker';
 
 interface InputBarProps {
+  textInputRef: RefObject<TextInput>
   setText: (value: string) => void;
   setDialogVisible: React.Dispatch<React.SetStateAction<boolean>>;
   image: ImageType | undefined;
@@ -24,6 +25,7 @@ interface InputBarProps {
 }
 
 const InputBar: React.FC<InputBarProps> = ({
+  textInputRef,
   setText,
   setDialogVisible,
   image,
@@ -60,7 +62,7 @@ const InputBar: React.FC<InputBarProps> = ({
     };
   }, []);
 
-  const textInputRef: RefObject<TextInput> = React.useRef<TextInput>(null);
+  
 
   useEffect(() => {
     if (keyboardEnabled) {
