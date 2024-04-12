@@ -33,6 +33,7 @@ import suggestions from '../assets/suggestions';
 import {useTheme} from '../Context/ThemeContext';
 import ImageOptions from '../Components/ImageOptions';
 import MenuContainer from '../Components/MenuContainer';
+import { sc, vc } from '../assets/Styles/Dimensions';
 
 interface AnimationProps {
   offsetValue: Animated.Value;
@@ -251,8 +252,9 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
 
   const {width} = Dimensions.get('window');
   const modelImage = require('../../android/app/src/main/res/mipmap-hdpi/ic_launcher.png');
+  const {height} = Dimensions.get('window');
   return (
-    <KeyboardAvoidingView behavior={'height'} style={{height: '100%'}}>
+    <KeyboardAvoidingView behavior={'height'} style={{flex: 1, position: 'relative', marginTop: height*0.04}}>
       <View style={styles.headContainer}>
         {
           // Head container
@@ -394,7 +396,7 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
             {suggestions.map(suggestion => (
               <View
                 key={suggestion.imgUri}
-                style={{height: 300, width: 270, margin: 10}}>
+                style={{height: sc(290), width: sc(260), margin: 10}}>
                 <TouchableWithoutFeedback
                   onPress={() => {
                     startSuggestionChats(suggestion.prompt);
@@ -477,11 +479,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   AskGemini: {
-    fontSize: 34,
+    fontSize: sc(30),
     fontWeight: '500',
   },
   tagLine: {
-    fontSize: 18,
+    fontSize: sc(16),
     fontWeight: '300',
     color: '#000',
     letterSpacing: 0.8,
@@ -490,6 +492,7 @@ const styles = StyleSheet.create({
   suggestions: {
     position: 'absolute',
     bottom: -40,
+    fontSize: sc(13),
     alignSelf: 'center',
     padding: 15,
     borderRadius: 10,
@@ -502,7 +505,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   confession: {
-    fontSize: 12,
+    fontSize: sc(12),
     color: '#000',
     alignSelf: 'center',
   },
@@ -518,11 +521,11 @@ const styles = StyleSheet.create({
   },
   inputBarContainer: {
     position: 'absolute',
-    bottom: 8,
+    bottom: 5,
     gap: 10,
     width: '100%',
     alignSelf: 'center',
-    paddingHorizontal: 10,
+    paddingHorizontal: sc(5),
   },
   goToBottomButton: {
     alignSelf: 'center',

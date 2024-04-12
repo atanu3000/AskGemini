@@ -1,5 +1,5 @@
 import {
-  Image,
+  Linking,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -46,7 +46,10 @@ const Settings = () => {
   const handleLogout = () => {
     appwrite.LogoutUser().then(() => {
       setIsLogedin(false);
-      ToastAndroid.show('Good bye '+userData?.name.split(' ')[0], ToastAndroid.SHORT);
+      ToastAndroid.show(
+        'Good bye ' + userData?.name.split(' ')[0],
+        ToastAndroid.SHORT,
+      );
     });
   };
 
@@ -60,7 +63,7 @@ const Settings = () => {
     <>
       <StatusBar backgroundColor={Background} barStyle={barStyle} />
       <ThemeDialog visible={dialogVisible} onClose={toggleDialog} />
-      <ScrollView style={[styles.container, {backgroundColor: Background}]}>
+      <ScrollView style={[styles.container, {backgroundColor: Background}]} showsVerticalScrollIndicator={false}>
         <View style={styles.userContainer}>
           <Icon name={'circle-user'} solid size={32} color={FontColor} />
           <View>
@@ -103,7 +106,7 @@ const Settings = () => {
             </Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => Linking.openSettings()}>
           <View style={styles.options}>
             <Icon name={'lock'} size={18} color={FontColor} />
             <Text style={{color: FontColor, fontSize: 16}}>Permissions</Text>

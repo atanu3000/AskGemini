@@ -19,6 +19,8 @@ import {useTheme} from './Context/ThemeContext';
 import {useAppwrite} from './appwrite/AppwriteContext';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {AppStackParamList} from './routes/AppStack';
+import SplashScreen from './Screens/SpashScreen';
+import { vc } from './assets/Styles/Dimensions';
 
 export type userObj = {
   name: string;
@@ -30,10 +32,10 @@ type ScreenProps = NativeStackScreenProps<AppStackParamList, 'MainContainer'>;
 const MainContainer = ({navigation}: ScreenProps) => {
   const {theme} = useTheme();
   const isDarkTheme = theme === 'dark' ? true : false;
-  const ThemeColor = !isDarkTheme ? '#fff' : '#212121';
+  const ThemeColor = !isDarkTheme ? '#fff' : '#222831';
   const FontColor = !isDarkTheme ? '#212121' : '#fff';
   const barStyle = !isDarkTheme ? 'dark-content' : 'light-content';
-  const {width} = Dimensions.get('window');
+  const {width, height} = Dimensions.get('window');
 
   const offsetValue = React.useRef(new Animated.Value(0)).current;
   const modelImage = require('../android/app/src/main/res/mipmap-hdpi/ic_launcher.png');
@@ -41,6 +43,7 @@ const MainContainer = ({navigation}: ScreenProps) => {
 
   const {appwrite, setIsLogedin} = useAppwrite();
   const [userData, setUserData] = useState<userObj>();
+  const [isAppStarted, setIsAppStarted] = useState<boolean>(true);
 
   useEffect(() => {
     appwrite.GetCurrentUser().then(response => {
@@ -55,98 +58,121 @@ const MainContainer = ({navigation}: ScreenProps) => {
   }, [appwrite]);
 
   return (
-    <SafeAreaView
-      style={[
-        styles.menuContainer,
-        {backgroundColor: !isDarkTheme ? '#6a97f7' : '#1e2b47'},
-      ]}>
-      <StatusBar animated backgroundColor={ThemeColor} barStyle={barStyle} />
-      <View style={{height: '100%', justifyContent: 'space-between'}}>
-        <View>
-          <TouchableWithoutFeedback>
-            <View
+    <>
+      {isAppStarted ? (
+        <SplashScreen setIsLoading={setIsAppStarted} />
+      ) : (
+        <SafeAreaView
+          style={[
+            styles.menuContainer,
+            {backgroundColor: !isDarkTheme ? '#6a97f7' : '#1e2b47', paddingTop: height*0.04},
+          ]}>
+          <StatusBar
+            animated
+            backgroundColor={'transparent'}
+            barStyle={barStyle}
+            translucent
+          />
+          <View style={{height: '100%', justifyContent: 'space-between'}}>
+            <View>
+              <TouchableWithoutFeedback>
+                <View
+                  style={[
+                    styles.searchBox,
+                    {backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675'},
+                  ]}>
+                  <Icon name={'magnifying-glass'} size={16} color={FontColor} />
+                  <Text style={{color: FontColor, fontSize: 15}}>Search</Text>
+                </View>
+              </TouchableWithoutFeedback>
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  !isLoading && setIsChatStarted(false);
+                  setShowMenu(false);
+                  Animated.timing(offsetValue, {
+                    toValue: showMenu ? 0 : width * 0.8,
+                    duration: 300,
+                    useNativeDriver: true,
+                  }).start();
+                }}>
+                <View
+                  style={[
+                    styles.newChat,
+                    {backgroundColor: !isDarkTheme ? '#acdcfa' : '#60879e'},
+                  ]}>
+                  <Image source={modelImage} style={{height: 35, width: 35}} />
+                  <Text style={{color: FontColor, fontSize: 15}}>
+                    AskGemini
+                  </Text>
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('Settings');
+                Animated.timing(offsetValue, {
+                  toValue: showMenu ? 0 : width * 0.8,
+                  duration: 300,
+                  useNativeDriver: true,
+                }).start();
+                setShowMenu(!showMenu);
+              }}
               style={[
-                styles.searchBox,
+                styles.themeButton,
                 {backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675'},
               ]}>
-              <Icon name={'magnifying-glass'} size={16} color={FontColor} />
-              <Text style={{color: FontColor, fontSize: 15}}>Search</Text>
-            </View>
-          </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback
-            onPress={() => {
-              !isLoading && setIsChatStarted(false);
-              setShowMenu(false);
-              Animated.timing(offsetValue, {
-                toValue: showMenu ? 0 : width * 0.8,
-                duration: 300,
-                useNativeDriver: true,
-              }).start();
-            }}>
-            <View
-              style={[
-                styles.newChat,
-                {backgroundColor: !isDarkTheme ? '#acdcfa' : '#60879e'},
-              ]}>
-              <Image source={modelImage} style={{height: 35, width: 35}} />
-              <Text style={{color: FontColor, fontSize: 15}}>AskGemini</Text>
-            </View>
-          </TouchableWithoutFeedback>
-        </View>
-
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate('Settings');
-            Animated.timing(offsetValue, {
-              toValue: showMenu ? 0 : width * 0.8,
-              duration: 300,
-              useNativeDriver: true,
-            }).start();
-            setShowMenu(!showMenu);
-          }}
-          style={[
-            styles.themeButton,
-            {backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675'},
-          ]}>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-            <View style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
-              <Icon name={'circle-user'} solid size={35} color={FontColor} />
-              <View>
-                <Text
-                  style={{color: FontColor, fontSize: 16, fontWeight: '500'}}>
-                  {userData?.name}
-                </Text>
-                <Text style={{color: FontColor}}>
-                  {userData?.email.split('').slice(0, 17)}
-                  {userData?.email.length! > 17 && '...'}
-                </Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}>
+                <View
+                  style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
+                  <Icon
+                    name={'circle-user'}
+                    solid
+                    size={35}
+                    color={FontColor}
+                  />
+                  <View>
+                    <Text
+                      style={{
+                        color: FontColor,
+                        fontSize: 16,
+                        fontWeight: '500',
+                      }}>
+                      {userData?.name}
+                    </Text>
+                    <Text style={{color: FontColor}}>
+                      {userData?.email.split('').slice(0, 17)}
+                      {userData?.email.length! > 17 && '...'}
+                    </Text>
+                  </View>
+                </View>
+                <Icon name={'ellipsis-vertical'} color={FontColor} size={20} />
               </View>
-            </View>
-            <Icon name={'ellipsis-vertical'} color={FontColor} size={20} />
+            </TouchableOpacity>
           </View>
-        </TouchableOpacity>
-      </View>
-      <Animated.View
-        style={{
-          position: 'absolute',
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0,
-          transform: [{scale: 1}, {translateX: offsetValue}],
-        }}>
-        <LinearGradient
-          colors={['#ffffff00', '#a7c2fc77']}
-          style={[styles.container, {backgroundColor: ThemeColor}]}>
-          <ChatScreen offsetValue={offsetValue} />
-        </LinearGradient>
-      </Animated.View>
-    </SafeAreaView>
+          <Animated.View
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+              transform: [{scale: 1}, {translateX: offsetValue}],
+            }}>
+            <LinearGradient
+              colors={['#ffffff00', '#a7c2fc' + `${isDarkTheme ? '44' : '88'}`]}
+              style={[styles.container, {backgroundColor: ThemeColor}]}>
+              <ChatScreen offsetValue={offsetValue} />
+            </LinearGradient>
+          </Animated.View>
+        </SafeAreaView>
+      )}
+    </>
   );
 };
 
@@ -154,6 +180,7 @@ const styles = StyleSheet.create({
   menuContainer: {
     height: '100%',
     width: '100%',
+    // paddingTop: vc(13),
   },
   searchBox: {
     flexDirection: 'row',

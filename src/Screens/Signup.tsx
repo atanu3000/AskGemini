@@ -2,6 +2,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -21,12 +22,13 @@ import {useTheme} from '../Context/ThemeContext';
 import LinearGradient from 'react-native-linear-gradient';
 import LottieView from 'lottie-react-native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
+import { sc } from '../assets/Styles/Dimensions';
 
 type SignupScreenProps = NativeStackScreenProps<AuthStackParamList, 'Signup'>;
 
 const Signup = ({navigation}: SignupScreenProps) => {
   const {theme} = useTheme();
-  const ThemeColor = theme === 'dark' ? '#212121' : '#fff';
+  const ThemeColor = theme === 'dark' ? '#222831' : '#fff';
   const FontColor = theme === 'dark' ? '#ddd' : '#333';
   const barStyle = theme === 'dark' ? 'light-content' : 'dark-content';
   const {appwrite, setIsLogedin} = useAppwrite();
@@ -77,16 +79,16 @@ const Signup = ({navigation}: SignupScreenProps) => {
 
   return (
     <LinearGradient
-      colors={['#ffffff00', '#a7c2fc77']}
+      colors={['#ffffff00', '#a7c2fc'+`${theme === 'dark'  ? '44' : '88'}`]}
       style={[styles.container, {backgroundColor: ThemeColor}]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}>
+        >
         <StatusBar backgroundColor={ThemeColor} barStyle={barStyle} />
-        <View style={styles.formContainer}>
+        <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.headContainer}>
             <View style={{width: '50%'}}>
-              <Text style={{fontSize: 36, fontWeight: '500', color: FontColor}}>
+              <Text style={{fontSize: sc(30), fontWeight: '500', color: FontColor}}>
                 Sign up
               </Text>
               <Text style={{fontSize: 16, color: FontColor}}>
@@ -95,7 +97,7 @@ const Signup = ({navigation}: SignupScreenProps) => {
             </View>
             <LottieView
               source={require('../assets/signin-animation.json')}
-              style={{height: 220, width: 220}}
+              style={{height: sc(190), width: sc(190)}}
               autoPlay
               loop
             />
@@ -193,12 +195,12 @@ const Signup = ({navigation}: SignupScreenProps) => {
           <Pressable
             onPress={() => navigation.navigate('Login')}
             style={styles.loginContainer}>
-            <Text style={styles.haveAccountLabel}>
+            <Text style={[styles.haveAccountLabel, {color: FontColor}]}>
               Already have an account?{'  '}
               <Text style={styles.loginLabel}>Login</Text>
             </Text>
           </Pressable>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </LinearGradient>
   );
@@ -207,11 +209,7 @@ const Signup = ({navigation}: SignupScreenProps) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  formContainer: {
     justifyContent: 'center',
-    alignContent: 'center',
-    height: '100%',
   },
   headContainer: {
     flexDirection: 'row',
@@ -232,7 +230,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 15,
-    height: 60,
+    height: sc(50),
     alignSelf: 'center',
     borderRadius: 10,
     width: '80%',
@@ -254,7 +252,7 @@ const styles = StyleSheet.create({
   btn: {
     backgroundColor: '#4287f5',
     padding: 10,
-    height: 60,
+    height: sc(50),
     justifyContent: 'center',
     alignSelf: 'center',
     borderRadius: 10,
@@ -278,7 +276,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   loginContainer: {
-    marginTop: 60,
+    marginTop: sc(50),
+    paddingBottom: 30,
   },
   haveAccountLabel: {
     color: '#484848',

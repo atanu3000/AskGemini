@@ -38,19 +38,19 @@ const ThemeDialog: React.FC<ThemeDialogProps> = ({visible, onClose}) => {
           Select Theme
         </Text>
         <RadioButton.Group onValueChange={handleThemeChange} value={mode}>
-          <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}}>
+          <View style={{flexDirection: 'row', alignItems: 'center', gap: 5, marginVertical: 5}}>
             <RadioButton.Android value="default" />
             <TouchableOpacity onPress={() => handleThemeChange('default')}>
               <Text style={{color: fontColor}}>System (Default)</Text>
             </TouchableOpacity>
           </View>
-          <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}}>
+          <View style={{flexDirection: 'row', alignItems: 'center', gap: 5, marginVertical: 5}}>
             <RadioButton.Android value="light" />
             <TouchableOpacity onPress={() => handleThemeChange('light')}>
               <Text style={{color: fontColor}}>Light Mode</Text>
             </TouchableOpacity>
           </View>
-          <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}}>
+          <View style={{flexDirection: 'row', alignItems: 'center', gap: 5, marginVertical: 5}}>
             <RadioButton.Android value="dark" />
             <TouchableOpacity onPress={() => handleThemeChange('dark')}>
               <Text style={{color: fontColor}}>Dark Mode</Text>
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignSelf: 'center',
     bottom: '40%',
-    height: 190,
+    height: 220,
     width: '75%',
     elevation: 40,
     shadowOffset: {

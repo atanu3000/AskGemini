@@ -8,6 +8,7 @@ import {
 import React from 'react';
 import {useTheme} from '../Context/ThemeContext';
 import ImagePicker, { Image as ImageType } from 'react-native-image-crop-picker';
+import Icon from 'react-native-vector-icons/FontAwesome6';
 
 interface ImageOptionsProps {
   visible: boolean;
@@ -57,12 +58,18 @@ const ImageOptions = ({visible, setImage, onClose}: ImageOptionsProps) => {
       <View style={styles.container}>
         <View style={[styles.popup, {backgroundColor: backgroundColor}]}>
           <Text style={{fontSize: 18, color: fontColor}}>Select Image</Text>
-          <View style={{gap: 0, marginBottom: 5}}>
+          <View style={{marginBottom: 5}}>
             <TouchableOpacity style={{paddingVertical: 5}} onPress={openCamera}>
+              <View style={{flexDirection:'row', alignItems: 'center', gap: 10, marginVertical: 5}}>
+              <Icon name={"camera"} color={fontColor} size={20}/>
               <Text style={{color: fontColor}}>Take Photo</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity style={{paddingVertical: 5}} onPress={selectImage}>
+              <View style={{flexDirection:'row', alignItems: 'center', gap: 10, marginVertical: 5}}>
+              <Icon name={"file-image"} color={fontColor} size={20}/>
               <Text style={{color: fontColor}}>Choose from Liabrary</Text>
+              </View>
             </TouchableOpacity>
           </View>
           <TouchableOpacity onPress={onClose} style={{alignSelf: 'flex-end'}}>
@@ -91,7 +98,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignSelf: 'center',
     bottom: '40%',
-    height: 195,
+    height: 220,
     width: '75%',
     elevation: 100,
     shadowOffset: {

@@ -13,6 +13,7 @@ import Icon from 'react-native-vector-icons/FontAwesome6';
 import {useTheme} from '../Context/ThemeContext';
 import useChatContext from '../Context/ChatContext';
 import {Image as ImageType} from 'react-native-image-crop-picker';
+import { vc } from '../assets/Styles/Dimensions';
 
 interface InputBarProps {
   textInputRef: RefObject<TextInput>
@@ -45,7 +46,7 @@ const InputBar: React.FC<InputBarProps> = ({
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
       () => {
-        setMarginBottom(38);
+        // setMarginBottom(vc(28));
       },
     );
 
@@ -91,7 +92,7 @@ const InputBar: React.FC<InputBarProps> = ({
       <View
         style={[
           styles.container,
-          {overflow: 'hidden', marginBottom, backgroundColor: Themecolor},
+          {overflow: 'hidden', marginBottom: marginBottom, backgroundColor: Themecolor},
         ]}>
         {image && (
           <View style={{width: 70}}>
@@ -117,9 +118,9 @@ const InputBar: React.FC<InputBarProps> = ({
             onChangeText={text => inputHandler(text)}
             style={{
               color: colorMode,
-              height: Math.min(160, inputHeight),
+              height: Math.min(170, inputHeight),
               fontSize: 16,
-              width: '79%',
+              flex: 1,
             }}
             multiline={true}
             numberOfLines={6}

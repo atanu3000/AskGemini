@@ -4,7 +4,7 @@ import { useTheme } from '../Context/ThemeContext';
 
 const Loading = () => {
   const {theme} = useTheme();
-  const Background = theme === 'dark' ? '#222' : '#fff';
+  const Background = theme === 'dark' ? '#222831' : '#fff';
   const barStyle = theme === 'dark' ? 'light-content' : 'dark-content';
   const FontColor = theme === 'dark' ? '#eee' : '#444';
 
@@ -12,7 +12,7 @@ const Loading = () => {
     <>
     <StatusBar backgroundColor={Background} barStyle={barStyle} />
     <View style={[styles.container, {backgroundColor: Background}]}>
-      <ActivityIndicator size={40} color="#1d9bf0" />
+      <ActivityIndicator size={45} color="#1d9bf0" />
       <Text style={{color: FontColor, marginTop: 5}}>Loading...</Text>
     </View>
     </>
