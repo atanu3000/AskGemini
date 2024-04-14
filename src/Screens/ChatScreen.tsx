@@ -252,7 +252,9 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
 
   const {width} = Dimensions.get('window');
   const modelImage = require('../../android/app/src/main/res/mipmap-hdpi/ic_launcher.png');
-  const {height} = Dimensions.get('window');
+  const {height} = Dimensions.get('screen');
+  console.log(height);
+  
   return (
     <KeyboardAvoidingView behavior={'height'} style={{flex: 1, position: 'relative', marginTop: height*0.04}}>
       <View style={styles.headContainer}>
