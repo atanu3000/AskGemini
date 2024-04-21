@@ -34,6 +34,10 @@ import {useTheme} from '../Context/ThemeContext';
 import ImageOptions from '../Components/ImageOptions';
 import MenuContainer from '../Components/MenuContainer';
 import { sc, vc } from '../assets/Styles/Dimensions';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import RenameTitle from '../Components/RenameTitle';
+import 'react-native-get-random-values';
+import {v4 as uuidv4} from 'uuid';
 
 interface AnimationProps {
   offsetValue: Animated.Value;
@@ -41,11 +45,31 @@ interface AnimationProps {
   closeButtonOffset?: Animated.Value;
 }
 
+export type chatsType = {
+  id: string;
+  title: string;
+  chat: InputContent[];
+}
+
 const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
+  const {
+    isChatStarted,
+    setIsChatStarted,
+    showMenu,
+    setShowMenu,
+    setIsLoading,
+    chatHistory,
+    setChatHistory,
+    chatTitle,
+    setChatTitle,
+    chatId,
+    setChatId,
+    menuContainerVisible,
+    setMenuContainerVisible
+  } = useChatContext();
   const [textInput, setTextInput] = useState<string>('');
   const [selectedImage, setSelectedImage] = useState<ImageType>();
   const [isSuggestionChat, setIsSuggestionChat] = useState<boolean>(false);
-  const [chatHistory, setChatHistory] = useState<InputContent[]>([]);
   const {theme} = useTheme();
   const colorMode = theme === 'dark' ? '#ddd' : '#000';
   const isDarkTheme = theme === 'dark' ? true : false;
@@ -53,25 +77,51 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
   const textInputRef = React.useRef<TextInput>(null);
   const [showGoToBottomButton, setShowGoToBottomButton] =
     useState<boolean>(false);
-  const [title, setTitle] = useState<string>();
   const [currentApiKeyIndex, setCurrentApiKeyIndex] = useState<number>(0);
-  const {isChatStarted, setIsChatStarted, showMenu, setShowMenu, setIsLoading} =
-    useChatContext();
   const [dialogVisible, setDialogVisible] = useState<boolean>(false);
-  const [menuContainerVisible, setMenuContainerVisible] =
-    useState<boolean>(false); // TODO: move this as context level state
+  const [titleBoxVisible, setTitleBoxVisible] = useState<boolean>(false);
 
   React.useEffect(() => {
     const chatCleared = () => {
       if (!isChatStarted) {
         setChatHistory([]);
         setShowGoToBottomButton(false);
-        setTitle('');
+        setChatTitle('');
       }
     };
 
     chatCleared();
   }, [isChatStarted]);
+
+const ID: string = uuidv4(); // creates a unique string as ID
+// console.log(ID);
+
+const saveChats = async (chatTitle: string, chatContent: InputContent[]) => {
+  try {
+    const existingChat = await AsyncStorage.getItem('AskGemini_ChatHistory');
+    const currentChat: chatsType[] = existingChat ? JSON.parse(existingChat) : [];    
+
+    const index = currentChat.findIndex(chat => chat.id === chatId);
+
+    index !== -1
+      ? currentChat[index].chat = chatContent
+      : currentChat.push({id: chatId, title: chatTitle, chat: chatContent});
+
+    await AsyncStorage.setItem(
+      'AskGemini_ChatHistory',
+      JSON.stringify(currentChat),
+    );
+  } catch (error) {
+    console.error('Error saving chat history', error);
+  }
+};
+
+React.useEffect(() => {
+  const intervalId = setInterval(async () => {
+    chatId && chatTitle && chatHistory && await saveChats(chatTitle, chatHistory)
+  }, 100);
+  return () => clearInterval(intervalId);
+}, [chatHistory, chatTitle]);
 
   const handleScroll = (event: {
     nativeEvent: {
@@ -122,7 +172,7 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
         textInput;
       const result = await model.generateContent(query);
       const response = result.response;
-      setTitle(response.text().replace(/\*\*/g, ''));
+      setChatTitle(response.text().replace(/\*\*/g, ''));
     } catch (error) {}
   }
 
@@ -177,7 +227,8 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
     } finally {
       if (!isChatStarted) {
         generateTitle();
-      }
+        setChatId(ID)
+      }      
       setIsLoading(false);
       handleGoToBottom();
     }
@@ -250,219 +301,239 @@ const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
     setIsSuggestionChat(true);
   };
 
+  const handleOutside = () => {
+    if (showMenu) {
+      Animated.timing(offsetValue, {
+        toValue: showMenu ? 0 : width * 0.8,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+      setShowMenu(false);
+    }
+    setMenuContainerVisible(false);
+  }
+
   const {width} = Dimensions.get('window');
   const modelImage = require('../../android/app/src/main/res/mipmap-hdpi/ic_launcher.png');
   const {height} = Dimensions.get('screen');
-  console.log(height);
   
   return (
-    <KeyboardAvoidingView behavior={'height'} style={{flex: 1, position: 'relative', marginTop: height*0.04}}>
-      <View style={styles.headContainer}>
-        {
-          // Head container
-        }
-        <TouchableHighlight
-          activeOpacity={0.6}
-          underlayColor="#DDDDDD55"
-          onPress={() => {
-            Animated.timing(offsetValue, {
-              toValue: showMenu ? 0 : width * 0.8,
-              duration: 300,
-              useNativeDriver: true,
-            }).start();
-            textInputRef.current?.blur();
-            setShowMenu(!showMenu);
-            setMenuContainerVisible(false);
-          }}
-          style={{padding: 10, borderRadius: 10}}>
-          {showMenu ? (
-            <Icon name={'xmark'} color={colorMode} size={22} />
-          ) : (
-            <Icon name={'bars'} color={colorMode} size={20} />
-          )}
-        </TouchableHighlight>
-        <Text style={[styles.heading, {color: colorMode}]}>
-          {title?.split('').slice(0, 27)}
-          {title?.length! > 27 && '...'}
-        </Text>
-        <TouchableHighlight
-          activeOpacity={0.2}
-          underlayColor="#DDDDDD55"
-          onPress={() => setMenuContainerVisible(!menuContainerVisible)}
-          style={{
-            padding: 10,
-            borderRadius: 10,
-            paddingHorizontal: 12,
-            backgroundColor: menuContainerVisible ? '#CCCCCC55' : 'transparent',
-          }}>
-          <Icon name={'ellipsis-vertical'} color={colorMode} size={20} />
-        </TouchableHighlight>
-      </View>
+    <TouchableWithoutFeedback onPress={handleOutside}>
+      <KeyboardAvoidingView behavior={'height'} style={{flex: 1, marginTop: height*0.04}}>
+        <View style={styles.headContainer}>
+          {
+            // Head container
+          }
+          <TouchableHighlight
+            activeOpacity={0.6}
+            underlayColor="#DDDDDD55"
+            onPress={() => {
+              Animated.timing(offsetValue, {
+                toValue: showMenu ? 0 : width * 0.8,
+                duration: 300,
+                useNativeDriver: true,
+              }).start();
+              textInputRef.current?.blur();
+              setShowMenu(!showMenu);
+              setMenuContainerVisible(false);
+            }}
+            style={{padding: 10, borderRadius: 10}}>
+            {showMenu ? (
+              <Icon name={'xmark'} color={colorMode} size={22} />
+            ) : (
+              <Icon name={'bars'} color={colorMode} size={20} />
+            )}
+          </TouchableHighlight>
+          <Text style={[styles.heading, {color: colorMode}]}>
+            {chatTitle?.split('').slice(0, 26)}
+            {chatTitle?.length! > 26 && '...'}
+          </Text>
+          <TouchableHighlight
+            activeOpacity={0.2}
+            underlayColor="#DDDDDD55"
+            onPress={() => setMenuContainerVisible(!menuContainerVisible)}
+            style={{
+              padding: 10,
+              borderRadius: 10,
+              paddingHorizontal: 12,
+              backgroundColor: menuContainerVisible ? '#CCCCCC55' : 'transparent',
+            }}>
+            <Icon name={'ellipsis-vertical'} color={colorMode} size={20} />
+          </TouchableHighlight>
+        </View>
 
-      <MenuContainer
-        isVisible={menuContainerVisible}
-        onClose={() => setMenuContainerVisible(!menuContainerVisible)}
-      />
-
-      <ImageOptions
-        visible={dialogVisible}
-        setImage={setSelectedImage}
-        onClose={() => setDialogVisible(!dialogVisible)}
-      />
-
-      {isChatStarted ? (
-        <ChatContainer
-          chat={chatHistory}
-          scrollRef={scrollViewRef}
-          handleScroll={handleScroll}
+        <RenameTitle 
+          isVisible={titleBoxVisible}
+          onClose={() => setTitleBoxVisible(false)}
         />
-      ) : (
-        <ScrollView
-          contentContainerStyle={{paddingBottom: 100, paddingHorizontal: 10}}
-          showsVerticalScrollIndicator={false}>
-          <View style={{alignItems: 'center', alignSelf: 'center'}}>
-            <Image source={modelImage} style={{height: 55, width: 55}} />
-            <View style={{flexDirection: 'row'}}>
-              <Text
-                style={[
-                  styles.AskGemini,
-                  {color: isDarkTheme ? '#fff' : '#1B3C73' + 'ff'},
-                ]}>
-                A
-              </Text>
-              <Text
-                style={[
-                  styles.AskGemini,
-                  {color: isDarkTheme ? '#fff' : '#1B3C73' + 'cc'},
-                ]}>
-                s
-              </Text>
-              <Text
-                style={[
-                  styles.AskGemini,
-                  {color: isDarkTheme ? '#fff' : '#1B3C73' + '99'},
-                ]}>
-                k
-              </Text>
-              <Text
-                style={[
-                  styles.AskGemini,
-                  {color: isDarkTheme ? '#fff' : '#1B3C73' + '66'},
-                ]}>
-                G
-              </Text>
-              <Text
-                style={[
-                  styles.AskGemini,
-                  {color: isDarkTheme ? '#fff' : '#1B3C73' + '55'},
-                ]}>
-                e
-              </Text>
-              <Text
-                style={[
-                  styles.AskGemini,
-                  {color: isDarkTheme ? '#fff' : '#1B3C73' + '77'},
-                ]}>
-                m
-              </Text>
-              <Text
-                style={[
-                  styles.AskGemini,
-                  {color: isDarkTheme ? '#fff' : '#1B3C73' + '99'},
-                ]}>
-                i
-              </Text>
-              <Text
-                style={[
-                  styles.AskGemini,
-                  {color: isDarkTheme ? '#fff' : '#1B3C73' + 'cc'},
-                ]}>
-                n
-              </Text>
-              <Text
-                style={[
-                  styles.AskGemini,
-                  {color: isDarkTheme ? '#fff' : '#1B3C73' + 'ff'},
-                ]}>
-                i
+
+        <MenuContainer
+          isVisible={menuContainerVisible}
+          openRenameTitle={() => setTitleBoxVisible(true)}
+          onClose={() => setMenuContainerVisible(false)}
+        />
+
+        <ImageOptions
+          visible={dialogVisible}
+          setImage={setSelectedImage}
+          onClose={() => setDialogVisible(!dialogVisible)}
+        />
+
+        {isChatStarted ? (
+          <ChatContainer
+            chat={chatHistory}
+            scrollRef={scrollViewRef}
+            handleScroll={handleScroll}
+          />
+        ) : (
+          <ScrollView
+            contentContainerStyle={{paddingBottom: 100, paddingHorizontal: 10}}
+            showsVerticalScrollIndicator={false}>
+            <View style={{alignItems: 'center', alignSelf: 'center'}}>
+              <Image source={modelImage} style={{height: 55, width: 55}} />
+              <View style={{flexDirection: 'row'}}>
+                <Text
+                  style={[
+                    styles.AskGemini,
+                    {color: isDarkTheme ? '#fff' : '#1B3C73' + 'ff'},
+                  ]}>
+                  A
+                </Text>
+                <Text
+                  style={[
+                    styles.AskGemini,
+                    {color: isDarkTheme ? '#fff' : '#1B3C73' + 'cc'},
+                  ]}>
+                  s
+                </Text>
+                <Text
+                  style={[
+                    styles.AskGemini,
+                    {color: isDarkTheme ? '#fff' : '#1B3C73' + '99'},
+                  ]}>
+                  k
+                </Text>
+                <Text
+                  style={[
+                    styles.AskGemini,
+                    {color: isDarkTheme ? '#fff' : '#1B3C73' + '66'},
+                  ]}>
+                  G
+                </Text>
+                <Text
+                  style={[
+                    styles.AskGemini,
+                    {color: isDarkTheme ? '#fff' : '#1B3C73' + '55'},
+                  ]}>
+                  e
+                </Text>
+                <Text
+                  style={[
+                    styles.AskGemini,
+                    {color: isDarkTheme ? '#fff' : '#1B3C73' + '77'},
+                  ]}>
+                  m
+                </Text>
+                <Text
+                  style={[
+                    styles.AskGemini,
+                    {color: isDarkTheme ? '#fff' : '#1B3C73' + '99'},
+                  ]}>
+                  i
+                </Text>
+                <Text
+                  style={[
+                    styles.AskGemini,
+                    {color: isDarkTheme ? '#fff' : '#1B3C73' + 'cc'},
+                  ]}>
+                  n
+                </Text>
+                <Text
+                  style={[
+                    styles.AskGemini,
+                    {color: isDarkTheme ? '#fff' : '#1B3C73' + 'ff'},
+                  ]}>
+                  i
+                </Text>
+              </View>
+              <Text style={[styles.tagLine, {color: colorMode}]}>
+                Your everyday AI assistant
               </Text>
             </View>
-            <Text style={[styles.tagLine, {color: colorMode}]}>
-              Your everyday AI assistant
+            <ScrollView
+              horizontal={true}
+              style={{marginTop: 25}}
+              showsHorizontalScrollIndicator={false}>
+              {suggestions.map(suggestion => (
+                <View
+                  key={suggestion.imgUri}
+                  style={{height: sc(290), width: sc(260), margin: 10, maxHeight: 400, maxWidth: 350}}>
+                  <TouchableWithoutFeedback
+                    onPress={() => {
+                      startSuggestionChats(suggestion.prompt);
+                      setMenuContainerVisible(false);
+                    }}>
+                    <View>
+                      <Image
+                        source={{uri: suggestion.imgUri}}
+                        style={{height: 240, borderRadius: 10}}
+                      />
+                      <Text
+                        style={[
+                          styles.suggestions,
+                          {
+                            color: colorMode,
+                            backgroundColor: isDarkTheme
+                              ? '#2b2f33e4'
+                              : '#ffffffe4',
+                          },
+                        ]}>
+                        {suggestion.prompt}
+                      </Text>
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+              ))}
+            </ScrollView>
+            <Text style={[styles.confession, {color: colorMode}]}>
+              AskGemini is utilizing AI, can make mistakes.
             </Text>
-          </View>
-          <ScrollView
-            horizontal={true}
-            style={{marginTop: 25}}
-            showsHorizontalScrollIndicator={false}>
-            {suggestions.map(suggestion => (
-              <View
-                key={suggestion.imgUri}
-                style={{height: sc(290), width: sc(260), margin: 10}}>
-                <TouchableWithoutFeedback
-                  onPress={() => {
-                    startSuggestionChats(suggestion.prompt);
-                  }}>
-                  <View>
-                    <Image
-                      source={{uri: suggestion.imgUri}}
-                      style={{height: 240, borderRadius: 10}}
-                    />
-                    <Text
-                      style={[
-                        styles.suggestions,
-                        {
-                          color: colorMode,
-                          backgroundColor: isDarkTheme
-                            ? '#2b2f33e4'
-                            : '#ffffffe4',
-                        },
-                      ]}>
-                      {suggestion.prompt}
-                    </Text>
-                  </View>
-                </TouchableWithoutFeedback>
-              </View>
-            ))}
+            <View style={{flexDirection: 'row', gap: 5, marginTop: 25}}>
+              <Image source={modelImage} style={{height: 27, width: 27}} />
+              <Text style={[styles.model, {color: colorMode}]}>AskGemini</Text>
+            </View>
+            <Text style={[styles.initialPrompt, {color: colorMode}]}>
+              Welcome back. I am excited to share more with you. What do you want
+              to create today?
+            </Text>
           </ScrollView>
-          <Text style={[styles.confession, {color: colorMode}]}>
-            AskGemini is utilizing AI, can make mistakes.
-          </Text>
-          <View style={{flexDirection: 'row', gap: 5, marginTop: 25}}>
-            <Image source={modelImage} style={{height: 27, width: 27}} />
-            <Text style={[styles.model, {color: colorMode}]}>AskGemini</Text>
-          </View>
-          <Text style={[styles.initialPrompt, {color: colorMode}]}>
-            Welcome back. I am excited to share more with you. What do you want
-            to create today?
-          </Text>
-        </ScrollView>
-      )}
+        )}
 
-      <View style={{flex: 1}}>
-        {
-          // Scroller button and InputBar section
-        }
-        <View style={styles.inputBarContainer}>
-          {showGoToBottomButton && (
-            <TouchableOpacity
-              style={styles.goToBottomButton}
-              onPress={handleGoToBottom}>
-              <Icon name="angles-down" color={'#222'} size={16} />
-            </TouchableOpacity>
-          )}
-          <InputBar
-            textInputRef={textInputRef}
-            setText={setTextInput}
-            setDialogVisible={setDialogVisible}
-            image={selectedImage}
-            cancelImage={setSelectedImage}
-            runChat={runChat}
-            genImgResponse={genImgResponse}
-          />
+        <View style={{flex: 1}}>
+          {
+            // Scroller button and InputBar section
+          }
+          <View style={styles.inputBarContainer}>
+            {showGoToBottomButton && (
+              <TouchableOpacity
+                style={styles.goToBottomButton}
+                onPress={handleGoToBottom}>
+                <Icon name="angles-down" color={'#222'} size={16} />
+              </TouchableOpacity>
+            )}
+            <InputBar
+              textInputRef={textInputRef}
+              setText={setTextInput}
+              setDialogVisible={setDialogVisible}
+              image={selectedImage}
+              cancelImage={setSelectedImage}
+              runChat={runChat}
+              genImgResponse={genImgResponse}
+            />
+          </View>
         </View>
-      </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -504,7 +575,7 @@ const styles = StyleSheet.create({
       height: 1,
     },
     width: '94%',
-    lineHeight: 20,
+    lineHeight: sc(16),
   },
   confession: {
     fontSize: sc(12),
@@ -512,11 +583,12 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   model: {
-    fontSize: 16,
+    fontSize: sc(14),
     fontWeight: '500',
     color: '#000',
   },
   initialPrompt: {
+    fontSize: sc(13),
     marginTop: 15,
     lineHeight: 20,
     marginLeft: 30,

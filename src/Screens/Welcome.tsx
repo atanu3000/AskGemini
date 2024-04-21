@@ -11,7 +11,6 @@ import {
 import React from 'react';
 import {useAppwrite} from '../appwrite/AppwriteContext';
 import {useTheme} from '../Context/ThemeContext';
-import LottieView from 'lottie-react-native';
 
 const Welcome = () => {
   const {setIsLogedin} = useAppwrite();
@@ -27,7 +26,6 @@ const Welcome = () => {
         barStyle={barStyle}
       />
       <ScrollView
-        // contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{paddingBottom: 100}}>
         <Text style={[styles.heading, {color: FontColor}]}>

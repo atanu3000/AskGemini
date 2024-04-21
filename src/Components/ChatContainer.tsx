@@ -65,10 +65,11 @@ const ChatItem: React.FC<{
     const role = item.role === 'user' ? 'You' : 'AskGemini';
     const {width} = Dimensions.get('window');
     const path = extractImagePath(item.parts.toString());
+    const {setMenuContainerVisible} = useChatContext();
     return (
       <View style={{marginVertical: 0, marginTop: 0}}>
         <TouchableNativeFeedback
-          onPress={onPress}
+          onPress={() => {onPress(); setMenuContainerVisible(false)}}
           background={TouchableNativeFeedback.Ripple('#81aef733', false)}>
           <View
             style={{

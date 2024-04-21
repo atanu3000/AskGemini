@@ -7,7 +7,7 @@ import { useTheme } from '../Context/ThemeContext';
 
 export type AppStackParamList = {
   MainContainer: undefined;
-  Settings: undefined;
+  Settings: {name?: string, email?: string};
 };
 
 const Stack = createNativeStackNavigator<AppStackParamList>();

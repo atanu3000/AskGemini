@@ -1,20 +1,65 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
+import {StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View} from 'react-native';
+import React, {RefObject, useEffect, useState} from 'react';
 import useChatContext from '../Context/ChatContext';
 import {useTheme} from '../Context/ThemeContext';
 import Icon from 'react-native-vector-icons/FontAwesome6';
+import {getChats} from '../MainContainer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { chatsType } from '../Screens/ChatScreen';
 
 interface MainContainerProps {
   isVisible: boolean;
+  openRenameTitle: () => void;
   onClose: () => void;
 }
 
-const MenuContainer = ({isVisible, onClose}: MainContainerProps) => {
-  const {isChatStarted} = useChatContext();
+const MenuContainer = ({isVisible, onClose, openRenameTitle}: MainContainerProps) => {
+  const {
+    isChatStarted,
+    setIsChatStarted,
+    setChatTitle,
+    chatId,
+    setChatId,
+    setChatHistory,
+  } = useChatContext();
+  
   const {theme} = useTheme();
-
   const colorMode = theme === 'dark' ? '#ddd' : '#555';
   const backgroundColor = theme === 'dark' ? '#000' : '#fff';
+
+  const shareChat = () => {}
+
+  const deleteChat = async () => {
+    try {
+      const existingChats = await AsyncStorage.getItem('AskGemini_ChatHistory');
+
+      const currentChat: chatsType[] = existingChats ? JSON.parse(existingChats) : [];
+      // console.log(currentChat);
+      
+
+      const indexToDelete = currentChat.findIndex(chat => chat.id === chatId);
+      // console.log(indexToDelete);
+      
+      if (indexToDelete !== -1) {
+        currentChat.splice(indexToDelete!, 1);
+        // console.log(currentChat);
+        
+        await AsyncStorage.setItem(
+          'AskGemini_ChatHistory',
+          JSON.stringify(currentChat),
+        );
+      }
+    } catch (error) {
+      console.error('Error deleting item:', error);
+    } finally {
+      setChatHistory([]);
+      setIsChatStarted(false);
+      setChatTitle(undefined);
+      setChatId('');
+      ToastAndroid.show('Chat is deleted', ToastAndroid.SHORT)
+      onClose();
+    }
+  }
 
   if (!isVisible) return null;
 
@@ -42,13 +87,17 @@ const MenuContainer = ({isVisible, onClose}: MainContainerProps) => {
               <Text style={{color: colorMode, fontSize: 15}}>Share</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity 
+            onPress={() => {
+              openRenameTitle();
+              onClose();
+            }}>
             <View style={styles.buttons}>
               <Icon name={'pen'} size={20} color={colorMode} />
               <Text style={{color: colorMode, fontSize: 15}}>Rename</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={deleteChat}>
             <View style={styles.buttons}>
               <Icon name={'trash-can'} size={20} color={colorMode} />
               <Text style={{color: colorMode, fontSize: 15}}>Delete</Text>
@@ -63,19 +112,9 @@ const MenuContainer = ({isVisible, onClose}: MainContainerProps) => {
 export default MenuContainer;
 
 const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    zIndex: 100,
-    height: '100%',
-    width: '100%',
-    // backgroundColor: '#00000066',
-  },
   popup: {
     position: 'absolute',
     zIndex: 1000,
-    // justifyContent: 'space-between',
     alignSelf: 'flex-end',
     top: 50,
     right: 5,

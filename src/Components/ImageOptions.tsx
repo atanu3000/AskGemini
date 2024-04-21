@@ -67,7 +67,7 @@ const ImageOptions = ({visible, setImage, onClose}: ImageOptionsProps) => {
             </TouchableOpacity>
             <TouchableOpacity style={{paddingVertical: 5}} onPress={selectImage}>
               <View style={{flexDirection:'row', alignItems: 'center', gap: 10, marginVertical: 5}}>
-              <Icon name={"file-image"} color={fontColor} size={20}/>
+              <Icon name={"file-image"} solid color={fontColor} size={20}/>
               <Text style={{color: fontColor}}>Choose from Liabrary</Text>
               </View>
             </TouchableOpacity>

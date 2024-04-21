@@ -8,36 +8,24 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import {useTheme} from '../Context/ThemeContext';
 import {useAppwrite} from '../appwrite/AppwriteContext';
-import {userObj} from '../MainContainer';
-import Loading from '../Components/Loading';
 import ThemeDialog from '../Components/ThemeDialog';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {AppStackParamList} from '../routes/AppStack';
 
-const Settings = () => {
+type SettingsScreenProps = NativeStackScreenProps<AppStackParamList, 'Settings'>;
+
+const Settings = ({route}: SettingsScreenProps) => {
+  const {name, email} = route.params;
   const {appwrite, setIsLogedin} = useAppwrite();
   const {theme, mode} = useTheme();
   const Background = theme === 'dark' ? '#222' : '#fff';
   const FontColor = theme === 'dark' ? '#ddd' : '#444';
   const barStyle = theme === 'dark' ? 'light-content' : 'dark-content';
-  const [userData, setUserData] = useState<userObj>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [dialogVisible, setDialogVisible] = useState(false);
-
-  useEffect(() => {
-    appwrite.GetCurrentUser().then(response => {
-      if (response) {
-        const user: userObj = {
-          name: response.name,
-          email: response.email,
-        };
-        setUserData(user);
-        setIsLoading(false);
-      }
-    });
-  }, [appwrite]);
 
   const capitalizeFirstLetter = (str: string) => {
     return '(' + str.charAt(0).toUpperCase() + str.slice(1) + ')';
@@ -46,10 +34,7 @@ const Settings = () => {
   const handleLogout = () => {
     appwrite.LogoutUser().then(() => {
       setIsLogedin(false);
-      ToastAndroid.show(
-        'Good bye ' + userData?.name.split(' ')[0],
-        ToastAndroid.SHORT,
-      );
+      ToastAndroid.show('Good bye ' + name?.split(' ')[0], ToastAndroid.SHORT);
     });
   };
 
@@ -57,19 +42,17 @@ const Settings = () => {
     setDialogVisible(prevState => !prevState);
   };
 
-  if (isLoading) return <Loading />;
-
   return (
     <>
       <StatusBar backgroundColor={Background} barStyle={barStyle} />
       <ThemeDialog visible={dialogVisible} onClose={toggleDialog} />
-      <ScrollView style={[styles.container, {backgroundColor: Background}]} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={[styles.container, {backgroundColor: Background}]}
+        showsVerticalScrollIndicator={false}>
         <View style={styles.userContainer}>
           <Icon name={'circle-user'} solid size={32} color={FontColor} />
           <View>
-            <Text style={[styles.name, {color: FontColor}]}>
-              {userData?.name}
-            </Text>
+            <Text style={[styles.name, {color: FontColor}]}>{name}</Text>
           </View>
         </View>
         <Text style={{color: FontColor, fontWeight: '500', marginBottom: 10}}>
@@ -78,9 +61,7 @@ const Settings = () => {
         <View>
           <View style={styles.options}>
             <Icon name={'envelope'} size={18} color={FontColor} />
-            <Text style={{color: FontColor, fontSize: 16}}>
-              {userData?.email}
-            </Text>
+            <Text style={{color: FontColor, fontSize: 16}}>{email}</Text>
           </View>
         </View>
         <TouchableOpacity>

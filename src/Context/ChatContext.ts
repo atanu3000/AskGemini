@@ -1,3 +1,4 @@
+import { InputContent } from '@google/generative-ai';
 import React, { createContext, useContext } from 'react';
 
 export interface ChatContextProps {
@@ -7,6 +8,14 @@ export interface ChatContextProps {
   setShowMenu: React.Dispatch<React.SetStateAction<boolean>>;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  chatHistory: InputContent[];
+  setChatHistory: React.Dispatch<React.SetStateAction<InputContent[]>>;
+  chatTitle: string | undefined;
+  setChatTitle: React.Dispatch<React.SetStateAction<string | undefined>>;
+  chatId: string;
+  setChatId: React.Dispatch<React.SetStateAction<string>>;
+  menuContainerVisible: boolean
+  setMenuContainerVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const ChatContext = createContext<ChatContextProps | undefined>(undefined);

@@ -13,10 +13,10 @@ import Icon from 'react-native-vector-icons/FontAwesome6';
 import {useTheme} from '../Context/ThemeContext';
 import useChatContext from '../Context/ChatContext';
 import {Image as ImageType} from 'react-native-image-crop-picker';
-import { vc } from '../assets/Styles/Dimensions';
+import {vc} from '../assets/Styles/Dimensions';
 
 interface InputBarProps {
-  textInputRef: RefObject<TextInput>
+  textInputRef: RefObject<TextInput>;
   setText: (value: string) => void;
   setDialogVisible: React.Dispatch<React.SetStateAction<boolean>>;
   image: ImageType | undefined;
@@ -35,35 +35,11 @@ const InputBar: React.FC<InputBarProps> = ({
   genImgResponse,
 }) => {
   const [textInput, setTextInput] = useState<string>('');
-  const [marginBottom, setMarginBottom] = useState<number>(0);
   const [keyboardEnabled, setKeyboardEnabled] = useState(true);
   const [inputHeight, setInputHeight] = useState(50);
   const {theme} = useTheme();
   const colorMode = theme === 'dark' ? '#fff' : '#000';
   const Themecolor = theme === 'dark' ? '#383838' : '#ffffff';
-
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      () => {
-        // setMarginBottom(vc(28));
-      },
-    );
-
-    const keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      () => {
-        setMarginBottom(0);
-      },
-    );
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, []);
-
-  
 
   useEffect(() => {
     if (keyboardEnabled) {
@@ -84,7 +60,7 @@ const InputBar: React.FC<InputBarProps> = ({
     setText(value);
   };
 
-  const {isLoading} = useChatContext();
+  const {isLoading, setMenuContainerVisible} = useChatContext();
   const isTextEnter = textInput.trim().length !== 0;
 
   return (
@@ -92,7 +68,7 @@ const InputBar: React.FC<InputBarProps> = ({
       <View
         style={[
           styles.container,
-          {overflow: 'hidden', marginBottom: marginBottom, backgroundColor: Themecolor},
+          {overflow: 'hidden', backgroundColor: Themecolor},
         ]}>
         {image && (
           <View style={{width: 70}}>
@@ -140,11 +116,15 @@ const InputBar: React.FC<InputBarProps> = ({
             />
           ) : (
             <View style={{flexDirection: 'row'}}>
-              <TouchableOpacity
-                onPress={() => setDialogVisible(prevState => !prevState)}
-                style={{padding: 8}}>
-                <Icon name={'image'} size={20} color={colorMode} />
-              </TouchableOpacity>
+              {!isTextEnter && (
+                <>
+                  <TouchableOpacity
+                    onPress={() => {setDialogVisible(prevState => !prevState); setMenuContainerVisible(false)}}
+                    style={{padding: 8}}>
+                    <Icon name={'image'} size={20} color={colorMode} />
+                  </TouchableOpacity>
+                </>
+              )}
               <TouchableOpacity
                 disabled={!isTextEnter}
                 onPress={() => {
@@ -154,6 +134,7 @@ const InputBar: React.FC<InputBarProps> = ({
                   } else {
                     runChat();
                   }
+                  setMenuContainerVisible(false);
                   setTextInput('');
                   setInputHeight(50);
                 }}
