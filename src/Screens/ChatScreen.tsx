@@ -283,6 +283,7 @@ React.useEffect(() => {
     } finally {
       if (!isChatStarted) {
         generateTitle();
+        setChatId(ID);
       }
       setIsLoading(false);
       handleGoToBottom();

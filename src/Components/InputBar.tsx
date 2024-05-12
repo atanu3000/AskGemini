@@ -121,10 +121,10 @@ const InputBar: React.FC<InputBarProps> = ({
               <>
                 <TouchableOpacity
                   onPress={() => {setDialogVisible(prevState => !prevState); setMenuContainerVisible(false)}}
-                  style={{paddingHorizontal: sc(6) > 11 ? 11 : sc(6)}}>
+                  style={{paddingHorizontal: sc(7) > 15 ? 15 : sc(7)}}>
                   <Icon name={'image'} size={iconSize} color={colorMode} />
                 </TouchableOpacity>
-                <TouchableOpacity style={{paddingHorizontal: sc(6) > 11 ? 11 : sc(6)}}>
+                <TouchableOpacity style={{paddingHorizontal: sc(7) > 15 ? 15 : sc(7)}}>
                   <Icon name={'paperclip'} size={iconSize} color={colorMode} />
                 </TouchableOpacity>
               </>
@@ -142,7 +142,7 @@ const InputBar: React.FC<InputBarProps> = ({
                 setTextInput('');
                 setInputHeight(50);
               }}
-              style={{paddingHorizontal: sc(6) > 11 ? 11 : sc(6)}}>
+              style={{paddingHorizontal: sc(7) > 15 ? 15 : sc(7)}}>
               <Icon
                 solid={isTextEnter}
                 name={'paper-plane'}

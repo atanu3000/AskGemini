@@ -169,6 +169,7 @@ const MainContainer = ({navigation}: ScreenProps) => {
               name: userData?.name,
               email: userData?.email,
             });
+            drawer.current?.closeDrawer();
           }}
           style={[
             styles.profileButton,
