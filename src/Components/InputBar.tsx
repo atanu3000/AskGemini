@@ -13,7 +13,7 @@ import Icon from 'react-native-vector-icons/FontAwesome6';
 import {useTheme} from '../Context/ThemeContext';
 import useChatContext from '../Context/ChatContext';
 import {Image as ImageType} from 'react-native-image-crop-picker';
-import {vc} from '../assets/Styles/Dimensions';
+import {sc, vc} from '../assets/Styles/Dimensions';
 
 interface InputBarProps {
   textInputRef: RefObject<TextInput>;
@@ -62,95 +62,98 @@ const InputBar: React.FC<InputBarProps> = ({
 
   const {isLoading, setMenuContainerVisible} = useChatContext();
   const isTextEnter = textInput.trim().length !== 0;
-
+  const iconSize = sc(18) > 26 ? 26 : sc(18);
+  // console.log(iconSize);
+  
   return (
-    <>
+    <View
+      style={[
+        styles.container,
+        {overflow: 'hidden', backgroundColor: Themecolor},
+      ]}>
+      {image && (
+        <View style={{width: 70}}>
+          <TouchableOpacity
+            onPress={() => cancelImage(undefined)}
+            style={[
+              styles.cancelImage,
+              {backgroundColor: Themecolor + 'bb'},
+            ]}>
+            <Icon name={'xmark'} size={15} color={colorMode} />
+          </TouchableOpacity>
+          <Image
+            source={{uri: image.path}}
+            style={{height: 70, width: 70, marginTop: 8, borderRadius: 15}}
+          />
+        </View>
+      )}
       <View
-        style={[
-          styles.container,
-          {overflow: 'hidden', backgroundColor: Themecolor},
-        ]}>
-        {image && (
-          <View style={{width: 70}}>
+        style={[styles.textInputContainer, {backgroundColor: Themecolor}]}>
+        <TextInput
+          ref={textInputRef}
+          value={textInput}
+          onChangeText={text => inputHandler(text)}
+          style={{
+            color: colorMode,
+            height: Math.min(170, inputHeight),
+            fontSize: sc(14) > 20 ? 20 : sc(14),
+            flex: 1,
+          }}
+          multiline={true}
+          numberOfLines={6}
+          textAlignVertical="top"
+          onContentSizeChange={handleContentSizeChange}
+          autoCorrect={false}
+          autoCapitalize="sentences"
+          placeholder="Ask me anything..."
+          placeholderTextColor={theme === 'dark' ? '#bbb' : '#888'}
+        />
+        {isLoading ? (
+          <Icon
+            name={'circle-stop'}
+            size={iconSize}
+            color={colorMode}
+            style={{paddingRight: 10}}
+          />
+        ) : (
+          <View style={{flexDirection: 'row'}}>
+            {!isTextEnter && (
+              <>
+                <TouchableOpacity
+                  onPress={() => {setDialogVisible(prevState => !prevState); setMenuContainerVisible(false)}}
+                  style={{paddingHorizontal: sc(6) > 11 ? 11 : sc(6)}}>
+                  <Icon name={'image'} size={iconSize} color={colorMode} />
+                </TouchableOpacity>
+                <TouchableOpacity style={{paddingHorizontal: sc(6) > 11 ? 11 : sc(6)}}>
+                  <Icon name={'paperclip'} size={iconSize} color={colorMode} />
+                </TouchableOpacity>
+              </>
+            )}
             <TouchableOpacity
-              onPress={() => cancelImage(undefined)}
-              style={[
-                styles.cancelImage,
-                {backgroundColor: Themecolor + 'bb'},
-              ]}>
-              <Icon name={'xmark'} size={15} color={colorMode} />
+              disabled={!isTextEnter}
+              onPress={() => {
+                if (image) {
+                  cancelImage(undefined);
+                  genImgResponse();
+                } else {
+                  runChat();
+                }
+                setMenuContainerVisible(false);
+                setTextInput('');
+                setInputHeight(50);
+              }}
+              style={{paddingHorizontal: sc(6) > 11 ? 11 : sc(6)}}>
+              <Icon
+                solid={isTextEnter}
+                name={'paper-plane'}
+                size={iconSize}
+                color={isTextEnter ? colorMode : '#999'}
+              />
             </TouchableOpacity>
-            <Image
-              source={{uri: image.path}}
-              style={{height: 70, width: 70, marginTop: 8, borderRadius: 15}}
-            />
           </View>
         )}
-        <View
-          style={[styles.textInputContainer, {backgroundColor: Themecolor}]}>
-          <TextInput
-            ref={textInputRef}
-            value={textInput}
-            onChangeText={text => inputHandler(text)}
-            style={{
-              color: colorMode,
-              height: Math.min(170, inputHeight),
-              fontSize: 16,
-              flex: 1,
-            }}
-            multiline={true}
-            numberOfLines={6}
-            textAlignVertical="top"
-            onContentSizeChange={handleContentSizeChange}
-            autoCorrect={false}
-            autoCapitalize="sentences"
-            placeholder="Ask me anything..."
-            placeholderTextColor={theme === 'dark' ? '#bbb' : '#888'}
-          />
-          {isLoading ? (
-            <Icon
-              name={'circle-stop'}
-              size={20}
-              color={colorMode}
-              style={{paddingRight: 10}}
-            />
-          ) : (
-            <View style={{flexDirection: 'row'}}>
-              {!isTextEnter && (
-                <>
-                  <TouchableOpacity
-                    onPress={() => {setDialogVisible(prevState => !prevState); setMenuContainerVisible(false)}}
-                    style={{padding: 8}}>
-                    <Icon name={'image'} size={20} color={colorMode} />
-                  </TouchableOpacity>
-                </>
-              )}
-              <TouchableOpacity
-                disabled={!isTextEnter}
-                onPress={() => {
-                  if (image) {
-                    cancelImage(undefined);
-                    genImgResponse();
-                  } else {
-                    runChat();
-                  }
-                  setMenuContainerVisible(false);
-                  setTextInput('');
-                  setInputHeight(50);
-                }}
-                style={{padding: 8}}>
-                <Icon
-                  solid={isTextEnter}
-                  name={'paper-plane'}
-                  size={20}
-                  color={isTextEnter ? colorMode : '#999'}
-                />
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
       </View>
-    </>
+    </View>
   );
 };
 
@@ -160,7 +163,7 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: 25,
     paddingHorizontal: 10,
-    paddingVertical: 3,
+    paddingVertical: sc(3) >= 6 ? sc(3) : 3,
     borderWidth: 1,
     borderColor: '#a7c2fc',
   },

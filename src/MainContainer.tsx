@@ -1,6 +1,7 @@
 import {
   Animated,
   Dimensions,
+  DrawerLayoutAndroid,
   Image,
   SafeAreaView,
   ScrollView,
@@ -11,8 +12,8 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
-import ChatScreen, { chatsType } from './Screens/ChatScreen';
+import React, {useEffect, useRef, useState} from 'react';
+import ChatScreen, {chatsType} from './Screens/ChatScreen';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import useChatContext from './Context/ChatContext';
@@ -46,12 +47,23 @@ const MainContainer = ({navigation}: ScreenProps) => {
 
   const offsetValue = React.useRef(new Animated.Value(0)).current;
   const modelImage = require('../android/app/src/main/res/mipmap-hdpi/ic_launcher.png');
-  const {setIsChatStarted, showMenu, setShowMenu, isLoading, setChatHistory, setChatTitle, chatId, setChatId} = useChatContext();
+  const {
+    setIsChatStarted,
+    showMenu,
+    setShowMenu,
+    isLoading,
+    setChatHistory,
+    setChatTitle,
+    chatId,
+    setChatId,
+  } = useChatContext();
   const [chats, setChats] = useState<chatsType[]>();
 
   const {appwrite, setIsLogedin} = useAppwrite();
   const [userData, setUserData] = useState<userObj>();
   const [isAppStarted, setIsAppStarted] = useState<boolean>(true);
+  const drawer = useRef<DrawerLayoutAndroid>(null);
+
   useEffect(() => {
     appwrite.GetCurrentUser().then(response => {
       if (response) {
@@ -74,175 +86,161 @@ const MainContainer = ({navigation}: ScreenProps) => {
   }, []);
   //  console.log(chats);
   //  console.log(chatId);
-   
-   
+
   const viewChatHistory = (chatContent: chatsType, id: string) => {
     if (!isLoading) {
-      setIsChatStarted(true)
-      setChatId(id)
-      setChatHistory(chatContent.chat)
-      setChatTitle(chatContent.title)
-      Animated.timing(offsetValue, {
-        toValue: showMenu ? 0 : width * 0.8,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-      setShowMenu(false);
+      setIsChatStarted(true);
+      setChatId(id);
+      setChatHistory(chatContent.chat);
+      setChatTitle(chatContent.title);
+      drawer.current?.closeDrawer();
     }
-  }  
+  };
 
-  return (
-    <>
-      {isAppStarted ? (
-        <SplashScreen setIsLoading={setIsAppStarted} />
-      ) : (
-        <SafeAreaView
-          style={[
-            styles.menuContainer,
-            {
-              backgroundColor: !isDarkTheme ? '#6a97f7' : '#1e2b47',
-              paddingTop: height * 0.04,
-            },
-          ]}>
-          <StatusBar
-            animated
-            backgroundColor={'transparent'}
-            barStyle={barStyle}
-            translucent
-          />
-          <View style={{height: '100%', flex: 1}}>
-            <View>
-              <TouchableWithoutFeedback>
-                <View
-                  style={[
-                    styles.searchBox,
-                    {backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675'},
-                  ]}>
-                  <Icon name={'magnifying-glass'} size={16} color={FontColor} />
-                  <Text style={{color: FontColor, fontSize: 15}}>Search</Text>
-                </View>
-              </TouchableWithoutFeedback>
-              <TouchableWithoutFeedback
-                onPress={() => {
-                  !isLoading && setIsChatStarted(false);
-                  setShowMenu(false);
-                  Animated.timing(offsetValue, {
-                    toValue: showMenu ? 0 : width * 0.8,
-                    duration: 300,
-                    useNativeDriver: true,
-                  }).start();
-                  setChatId('');
-                }}>
-                <View
-                  style={[
-                    styles.newChat,
-                    {backgroundColor: !isDarkTheme ? '#acdcfa' : '#60879e'},
-                  ]}>
-                  <Image source={modelImage} style={{height: 35, width: 35}} />
-                  <Text style={{color: FontColor, fontSize: 15}}>
-                    AskGemini
-                  </Text>
-                </View>
-              </TouchableWithoutFeedback>
-            </View>
+  const newChat = () => {
+    drawer.current?.closeDrawer();
+    !isLoading && setIsChatStarted(false);
+    setChatId('');
+  };
 
-            <View style={{flex: 1}}>
-              {chats?.length === 0 ? (
-                <View style={styles.noChats}>
-                  <Icon name={'message'} size={25} color={FontColor} />
-                  <Text style={{color: FontColor, fontSize: 16}}>
-                    No recent chats
-                  </Text>
-                </View>
-              ) : (
-                <ScrollView style={{paddingTop: 10}}>
-                  {chats?.map(chat => (
-                    <TouchableOpacity
-                      key={chat.id}
-                      onPress={() => viewChatHistory(chat, chat.id)}
-                      style={[
-                        styles.oldChats,
-                        chatId === chat.id && {
-                          backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675',
-                        },
-                      ]}>
-                      <Text style={[styles.chatTitles, {color: FontColor}]}>
-                        {chat.title}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              )}
-            </View>
-
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate('Settings', {
-                  name: userData?.name,
-                  email: userData?.email,
-                });
-                Animated.timing(offsetValue, {
-                  toValue: showMenu ? 0 : width * 0.8,
-                  duration: 300,
-                  useNativeDriver: true,
-                }).start();
-                setShowMenu(!showMenu);
-              }}
+  const NavigationView: React.FC = () => {
+    return (
+      <View style={{height: '100%', flex: 1, paddingTop: height * 0.04}}>
+        <View>
+          <TouchableWithoutFeedback>
+            <View
               style={[
-                styles.profileButton,
+                styles.searchBox,
                 {backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675'},
               ]}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}>
-                <View
-                  style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
-                  <Icon
-                    name={'circle-user'}
-                    solid
-                    size={35}
-                    color={FontColor}
-                  />
-                  <View>
-                    <Text
-                      style={{
-                        color: FontColor,
-                        fontSize: 16,
-                        fontWeight: '500',
-                      }}>
-                      {userData?.name}
-                    </Text>
-                    <Text style={{color: FontColor}}>
-                      {userData?.email.split('').slice(0, 17)}
-                      {userData?.email.length! > 17 && '...'}
-                    </Text>
-                  </View>
-                </View>
-                <Icon name={'ellipsis-vertical'} color={FontColor} size={20} />
-              </View>
-            </TouchableOpacity>
-          </View>
-          <Animated.View
+              <Icon name={'magnifying-glass'} size={16} color={FontColor} />
+              <Text style={{color: FontColor, fontSize: 15}}>Search</Text>
+            </View>
+          </TouchableWithoutFeedback>
+          <TouchableWithoutFeedback onPress={newChat}>
+            <View
+              style={[
+                styles.newChat,
+                {backgroundColor: !isDarkTheme ? '#acdcfa' : '#60879e'},
+              ]}>
+              <Image source={modelImage} style={{height: 35, width: 35}} />
+              <Text style={{color: FontColor, fontSize: 15}}>
+                AskGemini{isLoading}
+              </Text>
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
+
+        <View style={{flex: 1}}>
+          {chats?.length === 0 ? (
+            <View style={styles.noChats}>
+              <Icon name={'message'} size={25} color={FontColor} />
+              <Text style={{color: FontColor, fontSize: 16}}>
+                No recent chats
+              </Text>
+            </View>
+          ) : (
+            <ScrollView style={{paddingTop: 10}}>
+              {chats?.map(chat => (
+                <TouchableOpacity
+                  key={chat.id}
+                  onPress={() => {
+                    viewChatHistory(chat, chat.id);
+                    
+                  }}
+                  style={[
+                    styles.oldChats,
+                    chatId === chat.id && {
+                      backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675',
+                    },
+                  ]}>
+                  <Text style={[styles.chatTitles, {color: FontColor}]}>
+                    {chat.title}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
+        </View>
+
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('Settings', {
+              name: userData?.name,
+              email: userData?.email,
+            });
+          }}
+          style={[
+            styles.profileButton,
+            {backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675'},
+          ]}>
+          <View
             style={{
-              position: 'absolute',
-              top: 0,
-              bottom: 0,
-              left: 0,
-              right: 0,
-              transform: [{scale: 1}, {translateX: offsetValue}],
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
             }}>
+            <View style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
+              <Icon name={'circle-user'} solid size={35} color={FontColor} />
+              <View>
+                <Text
+                  style={{
+                    color: FontColor,
+                    fontSize: 16,
+                    fontWeight: '500',
+                  }}>
+                  {userData?.name}
+                </Text>
+                <Text style={{color: FontColor}}>
+                  {userData?.email.split('').slice(0, 17)}
+                  {userData?.email.length! > 17 && '...'}
+                </Text>
+              </View>
+            </View>
+            <Icon name={'ellipsis-vertical'} color={FontColor} size={20} />
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  return (
+    <DrawerLayoutAndroid
+      ref={drawer}
+      drawerWidth={width * 0.8}
+      drawerPosition={'left'}
+      drawerBackgroundColor={!isDarkTheme ? '#6a97f7' : '#1e2b47'}
+      renderNavigationView={() => <NavigationView />}>
+      <View style={styles.container}>
+        {isAppStarted ? (
+          <SplashScreen setIsLoading={setIsAppStarted} />
+        ) : (
+          <SafeAreaView
+            style={[
+              styles.menuContainer,
+              {
+                // backgroundColor: !isDarkTheme ? '#6a97f7' : '#1e2b47',
+                // paddingTop: height * 0.04,
+              },
+            ]}>
+            <StatusBar
+              animated
+              backgroundColor={'transparent'}
+              barStyle={barStyle}
+              translucent
+            />
+
             <LinearGradient
               colors={['#ffffff00', '#a7c2fc' + `${isDarkTheme ? '44' : '88'}`]}
               style={[styles.container, {backgroundColor: ThemeColor}]}>
-              <ChatScreen offsetValue={offsetValue} />
+              <ChatScreen
+                openDrawer={drawer}
+              />
             </LinearGradient>
-          </Animated.View>
-        </SafeAreaView>
-      )}
-    </>
+          </SafeAreaView>
+        )}
+      </View>
+    </DrawerLayoutAndroid>
   );
 };
 
@@ -261,7 +259,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginTop: 15,
     marginHorizontal: 10,
-    width: '75%',
+    width: '85%',
   },
   newChat: {
     flexDirection: 'row',
@@ -281,9 +279,9 @@ const styles = StyleSheet.create({
     gap: 10,
     justifyContent: 'center',
     padding: 10,
-    width: '75%',
+    width: '85%',
     alignItems: 'center',
-    flex: 1
+    flex: 1,
   },
   oldChats: {
     // backgroundColor: '#ffffff55',
@@ -291,7 +289,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 20,
     marginHorizontal: 10,
-    width: '75%'
+    width: '85%',
   },
   chatTitles: {
     fontSize: 16,
@@ -300,10 +298,10 @@ const styles = StyleSheet.create({
   profileButton: {
     paddingVertical: 10,
     marginVertical: 10,
-    width: '75%',
+    width: '85%',
     marginHorizontal: 10,
     borderRadius: 20,
-    paddingHorizontal: 25,
+    paddingHorizontal: 15,
     // position: 'absolute',
     // bottom: 0
   },

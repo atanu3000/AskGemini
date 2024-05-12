@@ -1,5 +1,6 @@
 import { TextStyle, useColorScheme } from "react-native";
 import { useTheme } from "./Context/ThemeContext";
+import { sc } from "./assets/Styles/Dimensions";
 
 const getMarkdownStyle = (): {[key: string]: TextStyle} => {
   const {theme} = useTheme();
@@ -17,8 +18,8 @@ const getMarkdownStyle = (): {[key: string]: TextStyle} => {
     },
     body: {
       color: colorScheme === 'dark' ? '#fff' : '#000', 
-      fontSize: 15,
-      lineHeight: 20,
+      fontSize: sc(13) > 19 ? 19 : sc(13),
+      lineHeight: sc(18) > 27 ? 27 : sc(18),
     },
     code_block: {
       color: '#fff',

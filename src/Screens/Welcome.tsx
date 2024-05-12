@@ -11,6 +11,7 @@ import {
 import React from 'react';
 import {useAppwrite} from '../appwrite/AppwriteContext';
 import {useTheme} from '../Context/ThemeContext';
+import { sc } from '../assets/Styles/Dimensions';
 
 const Welcome = () => {
   const {setIsLogedin} = useAppwrite();
@@ -49,7 +50,7 @@ const Welcome = () => {
             ToastAndroid.show('Welcome to AskGemini', ToastAndroid.SHORT);
           }}>
           <View style={[styles.btn, {backgroundColor: FontColor}]}>
-            <Text style={{color: ThemeColor, fontSize: 16}}>Continue</Text>
+            <Text style={{color: ThemeColor, fontSize: sc(14) > 26 ? 26 : sc(14)}}>Continue</Text>
           </View>
         </TouchableWithoutFeedback>
       </ScrollView>
@@ -58,6 +59,7 @@ const Welcome = () => {
 };
 
 export default Welcome;
+console.log(sc(22));
 
 const styles = StyleSheet.create({
   container: {
@@ -66,11 +68,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   heading: {
-    fontSize: 24,
+    fontSize: sc(22),
     fontWeight: '300',
     color: '#000',
     textAlign: 'center',
-    marginVertical: 16,
+    marginVertical: sc(14),
   },
   seprator: {
     height: 1,
@@ -78,26 +80,26 @@ const styles = StyleSheet.create({
   },
   caption: {
     marginVertical: 5,
-    fontSize: 20,
+    fontSize: sc(18) > 28 ? 28 : sc(18),
     fontWeight: '400',
     fontStyle: 'italic',
     color: '#000',
     textAlign: 'center',
   },
   imageContainer: {
-    width: 100,
-    height: 100,
+    width: sc(85) > 150 ? 150 : sc(85),
+    height: sc(85) > 150 ? 150 : sc(85),
     backgroundColor: '#FFFFFF',
-    marginTop: 25,
+    marginTop: sc(23) > 45 ? 45 : sc(23),
     alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    borderRadius: 55,
+    borderRadius: sc(85) > 150 ? 150/2 : sc(85)/2,
   },
   image: {
-    width: 100,
-    height: 100,
+    width: sc(85) > 150 ? 150 : sc(85),
+    height: sc(85) > 150 ? 150 : sc(85),
   },
   btn: {
     alignItems: 'center',
@@ -105,6 +107,6 @@ const styles = StyleSheet.create({
     width: '60%',
     paddingVertical: 12,
     borderRadius: 25,
-    marginTop: 50,
+    marginTop: sc(46) > 70 ? 70 : sc(46),
   },
 });

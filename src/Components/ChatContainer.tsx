@@ -8,6 +8,7 @@ import useChatContext from '../Context/ChatContext';
 import LottieView from 'lottie-react-native';
 import {TouchableNativeFeedback} from 'react-native';
 import ActionButtons from './ActionButtons';
+import { sc } from '../assets/Styles/Dimensions';
 
 interface ChatContainerProps {
   chat: InputContent[];
@@ -78,9 +79,9 @@ const ChatItem: React.FC<{
               marginBottom: 5,
               paddingHorizontal: 10,
             }}>
-            <Image source={imageSrc} style={{height: 27, width: 27}} />
+            <Image source={imageSrc} style={{height: sc(25), width: sc(25), maxHeight: 34, maxWidth: 34}} />
             <View style={{width: width * 0.846}}>
-              <Text style={{color: colorMode, fontWeight: '500', fontSize: 16}}>
+              <Text style={{color: colorMode, fontWeight: '500', fontSize: sc(14) > 21 ? 21 : sc(14)}}>
                 {role}
               </Text>
               {path && (

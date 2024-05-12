@@ -1,9 +1,11 @@
 import {
   Animated,
   Dimensions,
+  DrawerLayoutAndroid,
   FlatList,
   Image,
   KeyboardAvoidingView,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,7 +15,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {RefObject, useState} from 'react';
 import InputBar from '../Components/InputBar';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import {Image as ImageType} from 'react-native-image-crop-picker';
@@ -39,10 +41,8 @@ import RenameTitle from '../Components/RenameTitle';
 import 'react-native-get-random-values';
 import {v4 as uuidv4} from 'uuid';
 
-interface AnimationProps {
-  offsetValue: Animated.Value;
-  scaleValue?: Animated.Value;
-  closeButtonOffset?: Animated.Value;
+interface DrawerLayoutProps {
+  openDrawer: RefObject<DrawerLayoutAndroid>
 }
 
 export type chatsType = {
@@ -51,7 +51,7 @@ export type chatsType = {
   chat: InputContent[];
 }
 
-const ChatScreen: React.FC<AnimationProps> = ({offsetValue}) => {
+const ChatScreen: React.FC<DrawerLayoutProps> = ({openDrawer}) => {
   const {
     isChatStarted,
     setIsChatStarted,
@@ -302,14 +302,6 @@ React.useEffect(() => {
   };
 
   const handleOutside = () => {
-    if (showMenu) {
-      Animated.timing(offsetValue, {
-        toValue: showMenu ? 0 : width * 0.8,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-      setShowMenu(false);
-    }
     setMenuContainerVisible(false);
   }
 
@@ -318,222 +310,218 @@ React.useEffect(() => {
   const {height} = Dimensions.get('screen');
   
   return (
-    <TouchableWithoutFeedback onPress={handleOutside}>
-      <KeyboardAvoidingView behavior={'height'} style={{flex: 1, marginTop: height*0.04}}>
-        <View style={styles.headContainer}>
-          {
-            // Head container
-          }
-          <TouchableHighlight
-            activeOpacity={0.6}
-            underlayColor="#DDDDDD55"
-            onPress={() => {
-              Animated.timing(offsetValue, {
-                toValue: showMenu ? 0 : width * 0.8,
-                duration: 300,
-                useNativeDriver: true,
-              }).start();
-              textInputRef.current?.blur();
-              setShowMenu(!showMenu);
-              setMenuContainerVisible(false);
-            }}
-            style={{padding: 10, borderRadius: 10}}>
-            {showMenu ? (
-              <Icon name={'xmark'} color={colorMode} size={22} />
-            ) : (
-              <Icon name={'bars'} color={colorMode} size={20} />
-            )}
-          </TouchableHighlight>
-          <Text style={[styles.heading, {color: colorMode}]}>
-            {chatTitle?.split('').slice(0, 26)}
-            {chatTitle?.length! > 26 && '...'}
-          </Text>
-          <TouchableHighlight
-            activeOpacity={0.2}
-            underlayColor="#DDDDDD55"
-            onPress={() => setMenuContainerVisible(!menuContainerVisible)}
-            style={{
-              padding: 10,
-              borderRadius: 10,
-              paddingHorizontal: 12,
-              backgroundColor: menuContainerVisible ? '#CCCCCC55' : 'transparent',
-            }}>
-            <Icon name={'ellipsis-vertical'} color={colorMode} size={20} />
-          </TouchableHighlight>
-        </View>
+    <SafeAreaView style={{flex: 1, paddingTop: height*0.04}}>
+      <TouchableWithoutFeedback onPress={handleOutside}>
+        <KeyboardAvoidingView behavior={'height'} style={{flex: 1}}>
+          <View style={styles.headContainer}>
+            {
+              // Head container
+            }
+            <TouchableHighlight
+              activeOpacity={0.6}
+              underlayColor="#DDDDDD55"
+              onPress={() => {
+                openDrawer.current?.openDrawer();
+                textInputRef.current?.blur();
+                // setShowMenu(!showMenu);
+                setMenuContainerVisible(false);
+              }}
+              style={{padding: 10, borderRadius: 10}}>
+                <Icon name={'bars'} color={colorMode} size={20} />
 
-        <RenameTitle 
-          isVisible={titleBoxVisible}
-          onClose={() => setTitleBoxVisible(false)}
-        />
+            </TouchableHighlight>
+            <Text style={[styles.heading, {color: colorMode}]}>
+              {chatTitle?.split('').slice(0, sc(25))}
+              {chatTitle?.length! > sc(25) && '...'}
+            </Text>
+            <TouchableHighlight
+              activeOpacity={0.2}
+              underlayColor="#DDDDDD55"
+              onPress={() => setMenuContainerVisible(!menuContainerVisible)}
+              style={{
+                padding: 10,
+                borderRadius: 10,
+                paddingHorizontal: 12,
+                backgroundColor: menuContainerVisible ? '#CCCCCC55' : 'transparent',
+              }}>
+              <Icon name={'ellipsis-vertical'} color={colorMode} size={20} />
+            </TouchableHighlight>
+          </View>
 
-        <MenuContainer
-          isVisible={menuContainerVisible}
-          openRenameTitle={() => setTitleBoxVisible(true)}
-          onClose={() => setMenuContainerVisible(false)}
-        />
-
-        <ImageOptions
-          visible={dialogVisible}
-          setImage={setSelectedImage}
-          onClose={() => setDialogVisible(!dialogVisible)}
-        />
-
-        {isChatStarted ? (
-          <ChatContainer
-            chat={chatHistory}
-            scrollRef={scrollViewRef}
-            handleScroll={handleScroll}
+          <RenameTitle
+            isVisible={titleBoxVisible}
+            onClose={() => setTitleBoxVisible(false)}
           />
-        ) : (
-          <ScrollView
-            contentContainerStyle={{paddingBottom: 100, paddingHorizontal: 10}}
-            showsVerticalScrollIndicator={false}>
-            <View style={{alignItems: 'center', alignSelf: 'center'}}>
-              <Image source={modelImage} style={{height: 55, width: 55}} />
-              <View style={{flexDirection: 'row'}}>
-                <Text
-                  style={[
-                    styles.AskGemini,
-                    {color: isDarkTheme ? '#fff' : '#1B3C73' + 'ff'},
-                  ]}>
-                  A
-                </Text>
-                <Text
-                  style={[
-                    styles.AskGemini,
-                    {color: isDarkTheme ? '#fff' : '#1B3C73' + 'cc'},
-                  ]}>
-                  s
-                </Text>
-                <Text
-                  style={[
-                    styles.AskGemini,
-                    {color: isDarkTheme ? '#fff' : '#1B3C73' + '99'},
-                  ]}>
-                  k
-                </Text>
-                <Text
-                  style={[
-                    styles.AskGemini,
-                    {color: isDarkTheme ? '#fff' : '#1B3C73' + '66'},
-                  ]}>
-                  G
-                </Text>
-                <Text
-                  style={[
-                    styles.AskGemini,
-                    {color: isDarkTheme ? '#fff' : '#1B3C73' + '55'},
-                  ]}>
-                  e
-                </Text>
-                <Text
-                  style={[
-                    styles.AskGemini,
-                    {color: isDarkTheme ? '#fff' : '#1B3C73' + '77'},
-                  ]}>
-                  m
-                </Text>
-                <Text
-                  style={[
-                    styles.AskGemini,
-                    {color: isDarkTheme ? '#fff' : '#1B3C73' + '99'},
-                  ]}>
-                  i
-                </Text>
-                <Text
-                  style={[
-                    styles.AskGemini,
-                    {color: isDarkTheme ? '#fff' : '#1B3C73' + 'cc'},
-                  ]}>
-                  n
-                </Text>
-                <Text
-                  style={[
-                    styles.AskGemini,
-                    {color: isDarkTheme ? '#fff' : '#1B3C73' + 'ff'},
-                  ]}>
-                  i
+
+          <MenuContainer
+            isVisible={menuContainerVisible}
+            openRenameTitle={() => setTitleBoxVisible(true)}
+            onClose={() => setMenuContainerVisible(false)}
+          />
+
+          <ImageOptions
+            visible={dialogVisible}
+            setImage={setSelectedImage}
+            onClose={() => setDialogVisible(!dialogVisible)}
+          />
+
+          {isChatStarted ? (
+            <ChatContainer
+              chat={chatHistory}
+              scrollRef={scrollViewRef}
+              handleScroll={handleScroll}
+            />
+          ) : (
+            <ScrollView
+              contentContainerStyle={{paddingBottom: 100, paddingHorizontal: 10}}
+              showsVerticalScrollIndicator={false}>
+              <View style={{alignItems: 'center', alignSelf: 'center'}}>
+                <Image source={modelImage} style={{height: sc(50), width: sc(50), maxHeight: 70, maxWidth: 70}} />
+                <View style={{flexDirection: 'row'}}>
+                  <Text
+                    style={[
+                      styles.AskGemini,
+                      {color: isDarkTheme ? '#fff' : '#1B3C73' + 'ff'},
+                    ]}>
+                    A
+                  </Text>
+                  <Text
+                    style={[
+                      styles.AskGemini,
+                      {color: isDarkTheme ? '#fff' : '#1B3C73' + 'cc'},
+                    ]}>
+                    s
+                  </Text>
+                  <Text
+                    style={[
+                      styles.AskGemini,
+                      {color: isDarkTheme ? '#fff' : '#1B3C73' + '99'},
+                    ]}>
+                    k
+                  </Text>
+                  <Text
+                    style={[
+                      styles.AskGemini,
+                      {color: isDarkTheme ? '#fff' : '#1B3C73' + '66'},
+                    ]}>
+                    G
+                  </Text>
+                  <Text
+                    style={[
+                      styles.AskGemini,
+                      {color: isDarkTheme ? '#fff' : '#1B3C73' + '55'},
+                    ]}>
+                    e
+                  </Text>
+                  <Text
+                    style={[
+                      styles.AskGemini,
+                      {color: isDarkTheme ? '#fff' : '#1B3C73' + '77'},
+                    ]}>
+                    m
+                  </Text>
+                  <Text
+                    style={[
+                      styles.AskGemini,
+                      {color: isDarkTheme ? '#fff' : '#1B3C73' + '99'},
+                    ]}>
+                    i
+                  </Text>
+                  <Text
+                    style={[
+                      styles.AskGemini,
+                      {color: isDarkTheme ? '#fff' : '#1B3C73' + 'cc'},
+                    ]}>
+                    n
+                  </Text>
+                  <Text
+                    style={[
+                      styles.AskGemini,
+                      {color: isDarkTheme ? '#fff' : '#1B3C73' + 'ff'},
+                    ]}>
+                    i
+                  </Text>
+                </View>
+                <Text style={[styles.tagLine, {color: colorMode}]}>
+                  Your everyday AI assistant
                 </Text>
               </View>
-              <Text style={[styles.tagLine, {color: colorMode}]}>
-                Your everyday AI assistant
+              <ScrollView
+                horizontal={true}
+                style={{marginTop: 25}}
+                showsHorizontalScrollIndicator={false}>
+                {suggestions.map(suggestion => (
+                  <View
+                    key={suggestion.imgUri}
+                    style={{height: sc(290), width: sc(260), margin: 10, maxHeight: 420, maxWidth: 440}}>
+                    <TouchableWithoutFeedback
+                      onPress={() => {
+                        startSuggestionChats(suggestion.prompt);
+                        setMenuContainerVisible(false);
+                      }}>
+                      <View>
+                        <Image
+                          source={{uri: suggestion.imgUri}}
+                          style={{height: 240, borderRadius: 10}}
+                        />
+                        <Text
+                          style={[
+                            styles.suggestions,
+                            {
+                              color: colorMode,
+                              backgroundColor: isDarkTheme
+                                ? '#2b2f33e4'
+                                : '#ffffffe4',
+                            },
+                          ]}>
+                          {suggestion.prompt}
+                        </Text>
+                      </View>
+                    </TouchableWithoutFeedback>
+                  </View>
+                ))}
+              </ScrollView>
+              <Text style={[styles.confession, {color: colorMode}]}>
+                AskGemini is utilizing AI, can make mistakes.
               </Text>
-            </View>
-            <ScrollView
-              horizontal={true}
-              style={{marginTop: 25}}
-              showsHorizontalScrollIndicator={false}>
-              {suggestions.map(suggestion => (
-                <View
-                  key={suggestion.imgUri}
-                  style={{height: sc(290), width: sc(260), margin: 10, maxHeight: 400, maxWidth: 350}}>
-                  <TouchableWithoutFeedback
-                    onPress={() => {
-                      startSuggestionChats(suggestion.prompt);
-                      setMenuContainerVisible(false);
-                    }}>
-                    <View>
-                      <Image
-                        source={{uri: suggestion.imgUri}}
-                        style={{height: 240, borderRadius: 10}}
-                      />
-                      <Text
-                        style={[
-                          styles.suggestions,
-                          {
-                            color: colorMode,
-                            backgroundColor: isDarkTheme
-                              ? '#2b2f33e4'
-                              : '#ffffffe4',
-                          },
-                        ]}>
-                        {suggestion.prompt}
-                      </Text>
-                    </View>
-                  </TouchableWithoutFeedback>
-                </View>
-              ))}
+              <View style={{flexDirection: 'row', gap: 5, marginTop: 25, alignItems: 'center'}}>
+                <Image source={modelImage} style={{height: sc(26), width: sc(26), maxHeight: 38, maxWidth: 38 }} />
+                <Text style={[styles.model, {color: colorMode}]}>AskGemini</Text>
+              </View>
+              <Text style={[styles.initialPrompt, {color: colorMode}]}>
+                Welcome back. I am excited to share more with you. What do you want
+                to create today?
+              </Text>
             </ScrollView>
-            <Text style={[styles.confession, {color: colorMode}]}>
-              AskGemini is utilizing AI, can make mistakes.
-            </Text>
-            <View style={{flexDirection: 'row', gap: 5, marginTop: 25}}>
-              <Image source={modelImage} style={{height: 27, width: 27}} />
-              <Text style={[styles.model, {color: colorMode}]}>AskGemini</Text>
-            </View>
-            <Text style={[styles.initialPrompt, {color: colorMode}]}>
-              Welcome back. I am excited to share more with you. What do you want
-              to create today?
-            </Text>
-          </ScrollView>
-        )}
+          )}
 
-        <View style={{flex: 1}}>
-          {
-            // Scroller button and InputBar section
-          }
-          <View style={styles.inputBarContainer}>
-            {showGoToBottomButton && (
-              <TouchableOpacity
-                style={styles.goToBottomButton}
-                onPress={handleGoToBottom}>
-                <Icon name="angles-down" color={'#222'} size={16} />
-              </TouchableOpacity>
-            )}
-            <InputBar
-              textInputRef={textInputRef}
-              setText={setTextInput}
-              setDialogVisible={setDialogVisible}
-              image={selectedImage}
-              cancelImage={setSelectedImage}
-              runChat={runChat}
-              genImgResponse={genImgResponse}
-            />
+          <View style={{flex: 1}}>
+            {
+              // Scroller button and InputBar section
+            }
+            <View style={styles.inputBarContainer}>
+              {showGoToBottomButton && (
+                <TouchableOpacity
+                  style={styles.goToBottomButton}
+                  onPress={handleGoToBottom}>
+                  <Icon name="angles-down" color={'#222'} size={16} />
+                </TouchableOpacity>
+              )}
+              <InputBar
+                textInputRef={textInputRef}
+                setText={setTextInput}
+                setDialogVisible={setDialogVisible}
+                image={selectedImage}
+                cancelImage={setSelectedImage}
+                runChat={runChat}
+                genImgResponse={genImgResponse}
+              />
+            </View>
           </View>
-        </View>
-      </KeyboardAvoidingView>
-    </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
+    </SafeAreaView>
+    
   );
 };
 
@@ -541,7 +529,7 @@ export default ChatScreen;
 
 const styles = StyleSheet.create({
   heading: {
-    fontSize: 18,
+    fontSize: sc(16) > 26 ? 26 : sc(16),
     fontWeight: '500',
   },
   headContainer: {
@@ -552,11 +540,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   AskGemini: {
-    fontSize: sc(30),
+    fontSize: sc(30) > 60 ? 60 : sc(30),
     fontWeight: '500',
   },
   tagLine: {
-    fontSize: sc(16),
+    fontSize: sc(16) > 30 ? 30 : sc(16),
     fontWeight: '300',
     color: '#000',
     letterSpacing: 0.8,
@@ -565,7 +553,7 @@ const styles = StyleSheet.create({
   suggestions: {
     position: 'absolute',
     bottom: -40,
-    fontSize: sc(13),
+    fontSize: sc(13) > 22 ? 22 : sc(13),
     alignSelf: 'center',
     padding: 15,
     borderRadius: 10,
@@ -578,19 +566,20 @@ const styles = StyleSheet.create({
     lineHeight: sc(16),
   },
   confession: {
-    fontSize: sc(12),
+    fontSize: sc(12) > 20 ? 20 : sc(12),
     color: '#000',
     alignSelf: 'center',
   },
   model: {
-    fontSize: sc(14),
+    fontSize: sc(14) > 26 ? 26 : sc(14),
     fontWeight: '500',
     color: '#000',
   },
   initialPrompt: {
-    fontSize: sc(13),
+    fontSize: sc(12) > 20 ? 20 : sc(12) ,
+    // fontSize: sc(12),
     marginTop: 15,
-    lineHeight: 20,
+    lineHeight: sc(16),
     marginLeft: 30,
   },
   inputBarContainer: {

@@ -14,19 +14,6 @@ export const Router = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const {appwrite, isLogedin, setIsLogedin} = useAppwrite();
   const [isOnline, setIsOnline] = useState<boolean | null>(true);
-  // console.log('loggedin :: ' + isLogedin);
-  // console.log('loading :: ' + isLoading);
-
-  // useEffect(() => {
-    // const checkConnection = NetInfo.addEventListener(state => {
-    //   setIsOnline(state.isConnected);
-    // });
-
-  //   return () => {
-  //     checkConnection();
-  //   };
-  // }, []);
-  // console.log(isOnline);
 
   useEffect(() => {
     NetInfo.addEventListener(state => {

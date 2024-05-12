@@ -53,7 +53,7 @@ const Login = ({navigation}: LoginScreenProps) => {
         .LoginAccount(user)
         .then(response => {
           if (response) {
-            // setIsLoading(false);
+            setIsLoading(false);
             navigation.reset({
               index: 0,
               routes: [{ name: 'Welcome' }],
@@ -62,6 +62,7 @@ const Login = ({navigation}: LoginScreenProps) => {
         })
         .catch(e => {
           console.log(e);
+          setIsLoading(false);
           setError('Incorrect email or password');
         })
     }
@@ -79,16 +80,16 @@ const Login = ({navigation}: LoginScreenProps) => {
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.headContainer}>
             <View style={{width: '50%'}}>
-              <Text style={{fontSize: sc(30), fontWeight: '500', color: FontColor}}>
+              <Text style={{fontSize: sc(30) > 40 ? 60 : sc(30), fontWeight: '500', color: FontColor}}>
                 Sign in
               </Text>
-              <Text style={{fontSize: 16, color: FontColor}}>
+              <Text style={{fontSize: sc(14) > 20 ? 23 : 16, color: FontColor}}>
                 Access to your account
               </Text>
             </View>
             <LottieView
               source={require('../assets/signin-animation.json')}
-              style={{height: sc(190), width: sc(190)}}
+              style={{height: sc(190), width: sc(190), maxHeight: 320, maxWidth: 320}}
               autoPlay
               loop
             />
@@ -162,6 +163,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '80%',
+    maxWidth: 520,
     alignSelf: 'center',
     paddingHorizontal: 5,
     position: 'relative',
@@ -171,6 +173,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     paddingHorizontal: 12,
+    fontSize: sc(13) > 18 ? 20 : 14,
   },
   inputBar: {
     flexDirection: 'row',
@@ -178,9 +181,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 15,
     height: sc(50),
+    maxHeight: 75,
     alignSelf: 'center',
     borderRadius: 10,
     width: '80%',
+    maxWidth: 520,
     marginTop: 10,
     shadowColor: '#000',
     shadowOffset: {
@@ -194,16 +199,19 @@ const styles = StyleSheet.create({
   errorText: {
     color: 'red',
     alignSelf: 'center',
-    marginTop: 15,
+    marginTop: 10,
+    fontSize: sc(13) > 18 ? 20 : 14,
   },
   btn: {
     backgroundColor: '#4287f5',
     padding: 10,
     height: sc(50),
+    maxHeight: 75,
     justifyContent: 'center',
     alignSelf: 'center',
     borderRadius: 10,
     width: '80%',
+    maxWidth: 520,
     marginTop: 20,
 
     shadowColor: '#000',
@@ -213,7 +221,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.23,
     shadowRadius: 2.62,
-
     elevation: 3,
   },
   btnText: {
@@ -223,13 +230,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   signUpContainer: {
-    marginTop: sc(65),
+    marginTop: 40,
+    
     paddingBottom: 30,
   },
   noAccountLabel: {
+    color: '#484848',
     alignSelf: 'center',
-    fontWeight: '500',
-    fontSize: 15,
+    fontWeight: 'bold',
+    fontSize: sc(13) > 18 ? 20 : 15,
   },
   signUpLabel: {
     color: '#1d9bf0',
