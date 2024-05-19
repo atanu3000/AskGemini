@@ -454,7 +454,7 @@ React.useEffect(() => {
                 {suggestions.map(suggestion => (
                   <View
                     key={suggestion.imgUri}
-                    style={{height: sc(290), width: sc(260), margin: 10, maxHeight: 420, maxWidth: 440}}>
+                    style={{height: sc(290), width: sc(260), margin: 10, maxHeight: 420, maxWidth: 500}}>
                     <TouchableWithoutFeedback
                       onPress={() => {
                         startSuggestionChats(suggestion.prompt);
@@ -463,7 +463,7 @@ React.useEffect(() => {
                       <View>
                         <Image
                           source={{uri: suggestion.imgUri}}
-                          style={{height: 240, borderRadius: 10}}
+                          style={{height: sc(215) > 320 ? 320 : sc(215), borderRadius: 10}}
                         />
                         <Text
                           style={[

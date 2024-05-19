@@ -15,6 +15,7 @@ interface MainContainerProps {
 
 const MenuContainer = ({isVisible, onClose, openRenameTitle}: MainContainerProps) => {
   const {
+    isLoading,
     isChatStarted,
     setIsChatStarted,
     setChatTitle,
@@ -34,15 +35,15 @@ const MenuContainer = ({isVisible, onClose, openRenameTitle}: MainContainerProps
       const existingChats = await AsyncStorage.getItem('AskGemini_ChatHistory');
 
       const currentChat: chatsType[] = existingChats ? JSON.parse(existingChats) : [];
-      // console.log(currentChat);
+      console.log(currentChat);
       
 
       const indexToDelete = currentChat.findIndex(chat => chat.id === chatId);
-      // console.log(indexToDelete);
+      console.log(indexToDelete);
       
       if (indexToDelete !== -1) {
         currentChat.splice(indexToDelete!, 1);
-        // console.log(currentChat);
+        console.log(currentChat);
         
         await AsyncStorage.setItem(
           'AskGemini_ChatHistory',
@@ -60,6 +61,13 @@ const MenuContainer = ({isVisible, onClose, openRenameTitle}: MainContainerProps
       onClose();
     }
   }
+
+  const newChat = () => {
+    !isLoading && setIsChatStarted(false);
+    setChatTitle(undefined);
+    setChatId('');
+    onClose();
+  };
 
   if (!isVisible) return null;
 
@@ -81,6 +89,12 @@ const MenuContainer = ({isVisible, onClose, openRenameTitle}: MainContainerProps
       </TouchableOpacity>
       {isChatStarted && (
         <>
+        <TouchableOpacity onPress={newChat}>
+            <View style={styles.buttons}>
+              <Icon name={'comment'} size={20} color={colorMode} />
+              <Text style={{color: colorMode, fontSize: 15}}>New Chat</Text>
+            </View>
+          </TouchableOpacity>
           <TouchableOpacity>
             <View style={styles.buttons}>
               <Icon name={'share-from-square'} size={20} color={colorMode} />
@@ -103,6 +117,7 @@ const MenuContainer = ({isVisible, onClose, openRenameTitle}: MainContainerProps
               <Text style={{color: colorMode, fontSize: 15}}>Delete</Text>
             </View>
           </TouchableOpacity>
+          
         </>
       )}
     </View>

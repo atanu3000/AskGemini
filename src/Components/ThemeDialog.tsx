@@ -8,6 +8,7 @@ import {
 import {RadioButton} from 'react-native-paper';
 import {useTheme} from '../Context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {sc} from '../assets/Styles/Dimensions';
 
 interface ThemeDialogProps {
   visible: boolean;
@@ -34,26 +35,26 @@ const ThemeDialog: React.FC<ThemeDialogProps> = ({visible, onClose}) => {
   return (
     <View style={styles.container}>
       <View style={[styles.popup, {backgroundColor: backgroundColor}]}>
-        <Text style={{fontSize: 18, marginBottom: 10, color: fontColor}}>
+        <Text style={{fontSize: sc(16) > 26 ? 26 : sc(16), marginBottom: 10, color: fontColor}}>
           Select Theme
         </Text>
         <RadioButton.Group onValueChange={handleThemeChange} value={mode}>
-          <View style={{flexDirection: 'row', alignItems: 'center', gap: 5, marginVertical: 5}}>
+          <View style={{flexDirection: 'row', alignItems: 'center', gap: 5,marginVertical: sc(4) > 13 ? 13 : sc(4)}}>
             <RadioButton.Android value="default" />
             <TouchableOpacity onPress={() => handleThemeChange('default')}>
-              <Text style={{color: fontColor}}>System (Default)</Text>
+              <Text style={{color: fontColor, fontSize: sc(13) > 22 ? 22 : sc(13)}}>System (Default)</Text>
             </TouchableOpacity>
           </View>
-          <View style={{flexDirection: 'row', alignItems: 'center', gap: 5, marginVertical: 5}}>
+          <View style={{flexDirection: 'row', alignItems: 'center', gap: 5,marginVertical: sc(4) > 13 ? 13 : sc(4)}}>
             <RadioButton.Android value="light" />
             <TouchableOpacity onPress={() => handleThemeChange('light')}>
-              <Text style={{color: fontColor}}>Light Mode</Text>
+              <Text style={{color: fontColor, fontSize: sc(13) > 22 ? 22 : sc(13)}}>Light Mode</Text>
             </TouchableOpacity>
           </View>
-          <View style={{flexDirection: 'row', alignItems: 'center', gap: 5, marginVertical: 5}}>
+          <View style={{flexDirection: 'row', alignItems: 'center', gap: 5,marginVertical: sc(4) > 13 ? 13 : sc(4)}}>
             <RadioButton.Android value="dark" />
             <TouchableOpacity onPress={() => handleThemeChange('dark')}>
-              <Text style={{color: fontColor}}>Dark Mode</Text>
+              <Text style={{color: fontColor, fontSize: sc(13) > 22 ? 22 : sc(13)}}>Dark Mode</Text>
             </TouchableOpacity>
           </View>
         </RadioButton.Group>
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignSelf: 'center',
     bottom: '40%',
-    height: 220,
+    height: sc(200) > 280 ? 280 : sc(200),
     width: '75%',
     elevation: 40,
     shadowOffset: {

@@ -7,7 +7,6 @@ import { useTheme } from '../Context/ThemeContext';
 
 export type AppStackParamList = {
   MainContainer: undefined;
-  Settings: {name?: string, email?: string};
 };
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -25,17 +24,6 @@ export const AppStack = () => {
         name="MainContainer"
         component={MainContainer}
         options={{headerShown: false}}
-      />
-      <Stack.Screen
-        name="Settings"
-        component={Settings}
-        options={{
-          headerShadowVisible: false,
-          headerTitleAlign: 'left',
-          headerTitleStyle: {fontSize: 20},
-          headerStyle: {backgroundColor: Background},
-          headerTintColor: FontColor
-        }}
       />
     </Stack.Navigator>
   );

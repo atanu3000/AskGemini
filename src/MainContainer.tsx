@@ -3,6 +3,7 @@ import {
   Dimensions,
   DrawerLayoutAndroid,
   Image,
+  Modal,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -23,6 +24,8 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {AppStackParamList} from './routes/AppStack';
 import SplashScreen from './Screens/SpashScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Settings from './Screens/Settings';
+import {sc} from './assets/Styles/Dimensions';
 
 export type userObj = {
   name: string;
@@ -44,6 +47,8 @@ const MainContainer = ({navigation}: ScreenProps) => {
   const FontColor = !isDarkTheme ? '#212121' : '#fff';
   const barStyle = !isDarkTheme ? 'dark-content' : 'light-content';
   const {width, height} = Dimensions.get('window');
+  const drawerWidth = (width * 0.8) > 800 ? 800 : (width * 0.8);
+  const [settingVisible, setSettingVisible] = useState<boolean>(false);
 
   const offsetValue = React.useRef(new Animated.Value(0)).current;
   const modelImage = require('../android/app/src/main/res/mipmap-hdpi/ic_launcher.png');
@@ -101,17 +106,19 @@ const MainContainer = ({navigation}: ScreenProps) => {
     drawer.current?.closeDrawer();
     !isLoading && setIsChatStarted(false);
     setChatId('');
+    setChatTitle(undefined);
   };
 
   const NavigationView: React.FC = () => {
     return (
-      <View style={{height: '100%', flex: 1, paddingTop: height * 0.04}}>
-        <View>
+      <View style={{height: '100%', flex: 1, paddingTop: height * 0.04, alignItems: 'center'}}>
+        <View style={{width: '100%', alignItems: 'center'}}>
           <TouchableWithoutFeedback>
             <View
               style={[
                 styles.searchBox,
-                {backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675'},
+                {backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675',
+                width: '95%'},
               ]}>
               <Icon name={'magnifying-glass'} size={16} color={FontColor} />
               <Text style={{color: FontColor, fontSize: 15}}>Search</Text>
@@ -121,17 +128,16 @@ const MainContainer = ({navigation}: ScreenProps) => {
             <View
               style={[
                 styles.newChat,
-                {backgroundColor: !isDarkTheme ? '#acdcfa' : '#60879e'},
+                {backgroundColor: !isDarkTheme ? '#acdcfa' : '#60879e',
+                width: '100%'},
               ]}>
               <Image source={modelImage} style={{height: 35, width: 35}} />
-              <Text style={{color: FontColor, fontSize: 15}}>
-                AskGemini{isLoading}
-              </Text>
+              <Text style={{color: FontColor, fontSize: 15}}>AskGemini</Text>
             </View>
           </TouchableWithoutFeedback>
         </View>
 
-        <View style={{flex: 1}}>
+        <View style={{flex: 1, width: '100%'}}>
           {chats?.length === 0 ? (
             <View style={styles.noChats}>
               <Icon name={'message'} size={25} color={FontColor} />
@@ -146,7 +152,6 @@ const MainContainer = ({navigation}: ScreenProps) => {
                   key={chat.id}
                   onPress={() => {
                     viewChatHistory(chat, chat.id);
-                    
                   }}
                   style={[
                     styles.oldChats,
@@ -165,15 +170,17 @@ const MainContainer = ({navigation}: ScreenProps) => {
 
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('Settings', {
-              name: userData?.name,
-              email: userData?.email,
-            });
             drawer.current?.closeDrawer();
+            setSettingVisible(true);
+            // navigation.navigate('Settings', {
+            //   name: userData?.name,
+            //   email: userData?.email,
+            // });
           }}
           style={[
             styles.profileButton,
-            {backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675'},
+            {backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675',
+            width: drawerWidth * 0.95},
           ]}>
           <View
             style={{
@@ -193,8 +200,8 @@ const MainContainer = ({navigation}: ScreenProps) => {
                   {userData?.name}
                 </Text>
                 <Text style={{color: FontColor}}>
-                  {userData?.email.split('').slice(0, 17)}
-                  {userData?.email.length! > 17 && '...'}
+                  {userData?.email.split('').slice(0, sc(16) > 25 ? 25 : sc(16))}
+                  {userData?.email.length! > (sc(16) > 27 ? 27 : sc(16)) && '...'}
                 </Text>
               </View>
             </View>
@@ -204,11 +211,12 @@ const MainContainer = ({navigation}: ScreenProps) => {
       </View>
     );
   };
+  // console.log(settingVisible);
 
   return (
     <DrawerLayoutAndroid
       ref={drawer}
-      drawerWidth={width * 0.8}
+      drawerWidth={ drawerWidth }
       drawerPosition={'left'}
       drawerBackgroundColor={!isDarkTheme ? '#6a97f7' : '#1e2b47'}
       renderNavigationView={() => <NavigationView />}>
@@ -216,28 +224,33 @@ const MainContainer = ({navigation}: ScreenProps) => {
         {isAppStarted ? (
           <SplashScreen setIsLoading={setIsAppStarted} />
         ) : (
-          <SafeAreaView
-            style={[
-              styles.menuContainer,
-              {
-                // backgroundColor: !isDarkTheme ? '#6a97f7' : '#1e2b47',
-                // paddingTop: height * 0.04,
-              },
-            ]}>
+          <SafeAreaView style={[styles.menuContainer]}>
             <StatusBar
               animated
               backgroundColor={'transparent'}
               barStyle={barStyle}
               translucent
             />
-
-            <LinearGradient
-              colors={['#ffffff00', '#a7c2fc' + `${isDarkTheme ? '44' : '88'}`]}
-              style={[styles.container, {backgroundColor: ThemeColor}]}>
-              <ChatScreen
-                openDrawer={drawer}
+            <Modal
+              animationType="slide"
+              visible={settingVisible}
+              onRequestClose={() => setSettingVisible(false)}>
+              <Settings
+                name={userData?.name}
+                email={userData?.email}
+                onClose={() => setSettingVisible(false)}
               />
-            </LinearGradient>
+            </Modal>
+            {!settingVisible && (
+              <LinearGradient
+                colors={[
+                  '#ffffff00',
+                  '#a7c2fc' + `${isDarkTheme ? '44' : '88'}`,
+                ]}
+                style={[styles.container, {backgroundColor: ThemeColor}]}>
+                <ChatScreen openDrawer={drawer} />
+              </LinearGradient>
+            )}
           </SafeAreaView>
         )}
       </View>
@@ -259,8 +272,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 20,
     marginTop: 15,
-    marginHorizontal: 10,
-    width: '85%',
+    //marginHorizontal: 10,
   },
   newChat: {
     flexDirection: 'row',
@@ -299,12 +311,10 @@ const styles = StyleSheet.create({
   profileButton: {
     paddingVertical: 10,
     marginVertical: 10,
-    width: '85%',
     marginHorizontal: 10,
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    // position: 'absolute',
-    // bottom: 0
+    borderRadius: 30,
+    paddingLeft: 15,
+    paddingRight: 20,
   },
 });
 

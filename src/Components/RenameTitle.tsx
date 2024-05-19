@@ -13,6 +13,7 @@ import useChatContext from '../Context/ChatContext';
 import {useTheme} from '../Context/ThemeContext';
 import {chatsType} from '../Screens/ChatScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {sc} from '../assets/Styles/Dimensions';
 
 interface RenameTitleProps {
   isVisible: boolean;
@@ -58,13 +59,13 @@ const RenameTitle = ({isVisible, onClose}: RenameTitleProps) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar backgroundColor={'#00000066'} />
+      <StatusBar animated />
       <View style={[styles.popup, {backgroundColor: backgroundColor}]}>
         <TextInput
           style={{
             height: 90,
             color: colorMode,
-            fontSize: 16,
+            fontSize: sc(15) > 22 ? 22 : sc(15),
             padding: 10,
             borderRadius: 10,
             borderWidth: 1,
@@ -132,7 +133,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
   },
   button: {
-    fontSize: 15,
+    fontSize: sc(14) > 19 ? 19 : sc(14),
     fontWeight: '500',
   },
 });
