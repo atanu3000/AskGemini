@@ -1,5 +1,4 @@
 import {
-  Animated,
   Dimensions,
   DrawerLayoutAndroid,
   FlatList,
@@ -15,7 +14,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import React, {RefObject, useState} from 'react';
+import React, {RefObject, useEffect, useState} from 'react';
 import InputBar from '../Components/InputBar';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import {Image as ImageType} from 'react-native-image-crop-picker';
@@ -55,8 +54,7 @@ const ChatScreen: React.FC<DrawerLayoutProps> = ({openDrawer}) => {
   const {
     isChatStarted,
     setIsChatStarted,
-    showMenu,
-    setShowMenu,
+    conversationType,
     setIsLoading,
     chatHistory,
     setChatHistory,
@@ -80,6 +78,17 @@ const ChatScreen: React.FC<DrawerLayoutProps> = ({openDrawer}) => {
   const [currentApiKeyIndex, setCurrentApiKeyIndex] = useState<number>(0);
   const [dialogVisible, setDialogVisible] = useState<boolean>(false);
   const [titleBoxVisible, setTitleBoxVisible] = useState<boolean>(false);
+  const [tempOptions, setTempOptions] = useState({temp: 0.5, topK: 5, topP: 0.8});
+
+  useEffect(() => {
+    if (conversationType === "balanced") {
+      setTempOptions({temp: 0.5, topK: 5, topP: 0.8})
+    } else if (conversationType === "creative") {
+      setTempOptions({temp: 1, topK: 10, topP: 0.7})
+    } else {
+      setTempOptions({temp: 0.05, topK: 1, topP: 0.9});
+    }
+  }, [conversationType])
 
   React.useEffect(() => {
     const chatCleared = () => {
@@ -176,10 +185,11 @@ React.useEffect(() => {
     } catch (error) {}
   }
 
+
   const generationConfig = {
-    temperature: 0.9,
-    topK: 1,
-    topP: 1,
+    temperature: tempOptions.temp,
+    topK: tempOptions.topK,
+    topP: tempOptions.topP,
     maxOutputTokens: 2048,
   };
 
@@ -332,8 +342,8 @@ React.useEffect(() => {
 
             </TouchableHighlight>
             <Text style={[styles.heading, {color: colorMode}]}>
-              {chatTitle?.split('').slice(0, sc(25))}
-              {chatTitle?.length! > sc(25) && '...'}
+              {chatTitle?.split('').slice(0, sc(24))}
+              {chatTitle?.length! > sc(24) && '...'}
             </Text>
             <TouchableHighlight
               activeOpacity={0.2}

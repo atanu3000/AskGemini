@@ -14,8 +14,10 @@ export interface ChatContextProps {
   setChatTitle: React.Dispatch<React.SetStateAction<string | undefined>>;
   chatId: string;
   setChatId: React.Dispatch<React.SetStateAction<string>>;
-  menuContainerVisible: boolean
+  menuContainerVisible: boolean;
   setMenuContainerVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  conversationType: string;
+  setConversationType: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const ChatContext = createContext<ChatContextProps | undefined>(undefined);

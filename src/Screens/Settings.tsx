@@ -1,5 +1,6 @@
 import {
   Linking,
+  Modal,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -16,6 +17,8 @@ import ThemeDialog from '../Components/ThemeDialog';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {AppStackParamList} from '../routes/AppStack';
 import {sc} from '../assets/Styles/Dimensions';
+import ConversationDialog from '../Components/ConversationDialog';
+import ChatControlDialog from '../Components/ChatControlDialog';
 
 interface settingsScreenProps {
   name?: string;
@@ -30,7 +33,9 @@ const Settings = ({name, email, onClose}: settingsScreenProps) => {
   const Background = theme === 'dark' ? '#222' : '#fff';
   const FontColor = theme === 'dark' ? '#ddd' : '#444';
   const barStyle = theme === 'dark' ? 'light-content' : 'dark-content';
-  const [dialogVisible, setDialogVisible] = useState(false);
+  const [themeDialogVisible, setThemeDialogVisible] = useState(false);
+  const [conversationDialogVisible, setConversationDialogVisible] = useState(false);
+  const [chatControlDialogVisible, setChatControlDialogVisible] = useState(false);
 
   const capitalizeFirstLetter = (str: string) => {
     return '(' + str.charAt(0).toUpperCase() + str.slice(1) + ')';
@@ -43,14 +48,33 @@ const Settings = ({name, email, onClose}: settingsScreenProps) => {
     });
   };
 
-  const toggleDialog = () => {
-    setDialogVisible(prevState => !prevState);
+  const toggleThemeDialog = () => {
+    setThemeDialogVisible(prevState => !prevState);
   };
+  
+  const toggleConversationDialog = () => {
+    setConversationDialogVisible(prevState => !prevState);
+  };
+
+  const toggleChatControlDialog = () => {
+    setChatControlDialogVisible(prevState => !prevState);
+  };
+
+  const notFound = () => {
+    ToastAndroid.show('Not Found', ToastAndroid.SHORT);
+  }
 
   return (
     <>
       <StatusBar backgroundColor={Background} barStyle={barStyle} animated/>
-      <ThemeDialog visible={dialogVisible} onClose={toggleDialog} />
+      <Modal
+        animationType='fade'
+        visible={themeDialogVisible}
+        onRequestClose={toggleThemeDialog}>
+          <ThemeDialog visible={themeDialogVisible} onClose={toggleThemeDialog} />
+      </Modal>
+      <ConversationDialog visible={conversationDialogVisible} onClose={toggleConversationDialog}/>
+      <ChatControlDialog visible={chatControlDialogVisible} onClose={toggleChatControlDialog}/>
       <ScrollView
         style={[styles.container, {backgroundColor: Background}]}
         showsVerticalScrollIndicator={false}>
@@ -73,7 +97,7 @@ const Settings = ({name, email, onClose}: settingsScreenProps) => {
             <Text style={{color: FontColor, fontSize: sc(14.5) > 22 ? 22 : sc(14.5)}}>{email}</Text>
           </View>
         </View>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={toggleConversationDialog}>
           <View style={styles.options}>
             <Icon name={'message'} size={18} color={FontColor} />
             <Text style={{color: FontColor, fontSize: sc(14.5) > 22 ? 22 : sc(14.5)}}>
@@ -81,13 +105,13 @@ const Settings = ({name, email, onClose}: settingsScreenProps) => {
             </Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={toggleChatControlDialog}>
           <View style={styles.options}>
             <Icon name={'database'} size={18} color={FontColor} />
             <Text style={{color: FontColor, fontSize: sc(14.5) > 22 ? 22 : sc(14.5)}}>Chat Controls</Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={toggleDialog}>
+        <TouchableOpacity onPress={toggleThemeDialog}>
           <View style={styles.options}>
             <Icon name={'palette'} size={18} color={FontColor} />
             <Text style={{color: FontColor, fontSize: sc(14.5) > 22 ? 22 : sc(14.5)}}>Theme</Text>
@@ -105,19 +129,19 @@ const Settings = ({name, email, onClose}: settingsScreenProps) => {
         <Text style={{color: FontColor, fontWeight: '500', marginVertical: 10, fontSize: sc(13) > 19 ? 19 : sc(13)}}>
           About
         </Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={notFound}>
           <View style={styles.options}>
             <Icon name={'hand-holding-hand'} size={18} color={FontColor} />
             <Text style={{color: FontColor, fontSize: sc(14.5) > 22 ? 22 : sc(14.5)}}>Helps Center</Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={notFound}>
           <View style={styles.options}>
             <Icon name={'file-lines'} size={18} color={FontColor} />
             <Text style={{color: FontColor, fontSize: sc(14.5) > 22 ? 22 : sc(14.5)}}>Terms of Use</Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={notFound}>
           <View style={styles.options}>
             <Icon name={'user-lock'} size={18} color={FontColor} />
             <Text style={{color: FontColor, fontSize: sc(14.5) > 22 ? 22 : sc(14.5)}}>Privacy Policy</Text>

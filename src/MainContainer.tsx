@@ -32,15 +32,13 @@ export type userObj = {
   email: string;
 };
 
-type ScreenProps = NativeStackScreenProps<AppStackParamList, 'MainContainer'>;
-
 export const getChats = async (): Promise<chatsType[]> => {
   const chatContents = await AsyncStorage.getItem('AskGemini_ChatHistory');
   const parsedChats: chatsType[] = chatContents ? JSON.parse(chatContents) : [];
   return parsedChats;
 };
 
-const MainContainer = ({navigation}: ScreenProps) => {
+const MainContainer = () => {
   const {theme} = useTheme();
   const isDarkTheme = theme === 'dark' ? true : false;
   const ThemeColor = !isDarkTheme ? '#fff' : '#222831';
@@ -50,12 +48,9 @@ const MainContainer = ({navigation}: ScreenProps) => {
   const drawerWidth = (width * 0.8) > 800 ? 800 : (width * 0.8);
   const [settingVisible, setSettingVisible] = useState<boolean>(false);
 
-  const offsetValue = React.useRef(new Animated.Value(0)).current;
   const modelImage = require('../android/app/src/main/res/mipmap-hdpi/ic_launcher.png');
   const {
     setIsChatStarted,
-    showMenu,
-    setShowMenu,
     isLoading,
     setChatHistory,
     setChatTitle,
@@ -102,13 +97,6 @@ const MainContainer = ({navigation}: ScreenProps) => {
     }
   };
 
-  const newChat = () => {
-    drawer.current?.closeDrawer();
-    !isLoading && setIsChatStarted(false);
-    setChatId('');
-    setChatTitle(undefined);
-  };
-
   const NavigationView: React.FC = () => {
     return (
       <View style={{height: '100%', flex: 1, paddingTop: height * 0.04, alignItems: 'center'}}>
@@ -124,7 +112,7 @@ const MainContainer = ({navigation}: ScreenProps) => {
               <Text style={{color: FontColor, fontSize: 15}}>Search</Text>
             </View>
           </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback onPress={newChat}>
+          <TouchableWithoutFeedback onPress={() => drawer.current?.closeDrawer()}>
             <View
               style={[
                 styles.newChat,

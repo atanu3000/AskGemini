@@ -10,25 +10,27 @@ import {RadioButton} from 'react-native-paper';
 import {useTheme} from '../Context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {sc} from '../assets/Styles/Dimensions';
+import useChatContext from '../Context/ChatContext';
 
-interface ThemeDialogProps {
+interface ConversationDialogProps {
   visible: boolean;
   onClose: () => void;
 }
 
-const ThemeDialog: React.FC<ThemeDialogProps> = ({visible, onClose}) => {
-  const {mode, setMode, theme} = useTheme();
+const ConversationDialog: React.FC<ConversationDialogProps> = ({visible, onClose}) => {
+  const {theme} = useTheme();
+  const {conversationType, setConversationType} = useChatContext();
   const backgroundColor = theme === 'dark' ? '#000' : '#fff';
   const fontColor = theme === 'dark' ? '#fff' : '#000';
 
-  const handleThemeChange = (selectedTheme: string) => {
-    setMode(selectedTheme);
+  const handleConversationStyle = (conversationType: string) => {
+    setConversationType(conversationType)
+    saveConversationType(conversationType)
     onClose();
-    saveMode(selectedTheme);
-  };
+  }
 
-  const saveMode = async (themeMode: string) => {
-    await AsyncStorage.setItem('askGemini_theme_mode', themeMode);
+  const saveConversationType = async (conversationType: string) => {
+    await AsyncStorage.setItem('askGemini_conversation_type', conversationType);
   };
 
   if (!visible) return null;
@@ -39,25 +41,25 @@ const ThemeDialog: React.FC<ThemeDialogProps> = ({visible, onClose}) => {
       <View style={styles.container}>
         <View style={[styles.popup, {backgroundColor: backgroundColor}]}>
           <Text style={{fontSize: sc(16) > 26 ? 26 : sc(16), marginBottom: 10, color: fontColor}}>
-            Select Theme
+          Choose a conversation style
           </Text>
-          <RadioButton.Group onValueChange={handleThemeChange} value={mode}>
+          <RadioButton.Group onValueChange={handleConversationStyle} value={conversationType}>
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 5,marginVertical: sc(4) > 13 ? 13 : sc(4)}}>
-              <RadioButton.Android value="default" />
-              <TouchableOpacity onPress={() => handleThemeChange('default')}>
-                <Text style={{color: fontColor, fontSize: sc(13) > 22 ? 22 : sc(13)}}>System (Default)</Text>
+              <RadioButton.Android value="creative" />
+              <TouchableOpacity onPress={() => handleConversationStyle('creative')}>
+                <Text style={{color: fontColor, fontSize: sc(13) > 22 ? 22 : sc(13)}}>More Creative</Text>
               </TouchableOpacity>
             </View>
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 5,marginVertical: sc(4) > 13 ? 13 : sc(4)}}>
-              <RadioButton.Android value="light" />
-              <TouchableOpacity onPress={() => handleThemeChange('light')}>
-                <Text style={{color: fontColor, fontSize: sc(13) > 22 ? 22 : sc(13)}}>Light Mode</Text>
+              <RadioButton.Android value="balanced" />
+              <TouchableOpacity onPress={() => handleConversationStyle('balanced')}>
+                <Text style={{color: fontColor, fontSize: sc(13) > 22 ? 22 : sc(13)}}>More Balanced</Text>
               </TouchableOpacity>
             </View>
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 5,marginVertical: sc(4) > 13 ? 13 : sc(4)}}>
-              <RadioButton.Android value="dark" />
-              <TouchableOpacity onPress={() => handleThemeChange('dark')}>
-                <Text style={{color: fontColor, fontSize: sc(13) > 22 ? 22 : sc(13)}}>Dark Mode</Text>
+              <RadioButton.Android value="precise" />
+              <TouchableOpacity onPress={() => handleConversationStyle('precise')}>
+                <Text style={{color: fontColor, fontSize: sc(13) > 22 ? 22 : sc(13)}}>More Precise</Text>
               </TouchableOpacity>
             </View>
           </RadioButton.Group>
@@ -100,4 +102,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ThemeDialog;
+export default ConversationDialog;

@@ -6,6 +6,7 @@ import Icon from 'react-native-vector-icons/FontAwesome6';
 import {getChats} from '../MainContainer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { chatsType } from '../Screens/ChatScreen';
+import { sc } from '../assets/Styles/Dimensions';
 
 interface MainContainerProps {
   isVisible: boolean;
@@ -28,14 +29,16 @@ const MenuContainer = ({isVisible, onClose, openRenameTitle}: MainContainerProps
   const colorMode = theme === 'dark' ? '#ddd' : '#555';
   const backgroundColor = theme === 'dark' ? '#000' : '#fff';
 
-  const shareChat = () => {}
+  const shareChat = () => {
+    ToastAndroid.show('Service is not available', ToastAndroid.SHORT)
+  }
 
   const deleteChat = async () => {
     try {
       const existingChats = await AsyncStorage.getItem('AskGemini_ChatHistory');
 
       const currentChat: chatsType[] = existingChats ? JSON.parse(existingChats) : [];
-      console.log(currentChat);
+      // console.log(currentChat);
       
 
       const indexToDelete = currentChat.findIndex(chat => chat.id === chatId);
@@ -49,6 +52,10 @@ const MenuContainer = ({isVisible, onClose, openRenameTitle}: MainContainerProps
           'AskGemini_ChatHistory',
           JSON.stringify(currentChat),
         );
+
+        let chatHistory = await AsyncStorage.getItem('AskGemini_ChatHistory');
+        console.log(JSON.parse(chatHistory!));
+        
       }
     } catch (error) {
       console.error('Error deleting item:', error);
@@ -76,29 +83,21 @@ const MenuContainer = ({isVisible, onClose, openRenameTitle}: MainContainerProps
       <TouchableOpacity>
         <View style={styles.buttons}>
           <Icon name={'circle-info'} size={20} color={colorMode} />
-          <Text style={{color: colorMode, fontSize: 15}}>View Details</Text>
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity>
-        <View style={styles.buttons}>
-          <Icon name={'file-lines'} size={20} color={colorMode} />
-          <Text style={{color: colorMode, fontSize: 15}}>
-            Terms and Conditions
-          </Text>
+          <Text style={{color: colorMode, fontSize: sc(14.5) > 22 ? 22 : sc(14.5)}}>View Details</Text>
         </View>
       </TouchableOpacity>
       {isChatStarted && (
         <>
         <TouchableOpacity onPress={newChat}>
             <View style={styles.buttons}>
-              <Icon name={'comment'} size={20} color={colorMode} />
-              <Text style={{color: colorMode, fontSize: 15}}>New Chat</Text>
+              <Icon name={'wand-magic-sparkles'} size={20} color={colorMode} />
+              <Text style={{color: colorMode, fontSize: sc(14.5) > 22 ? 22 : sc(14.5)}}>New Chat</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={shareChat}>
             <View style={styles.buttons}>
               <Icon name={'share-from-square'} size={20} color={colorMode} />
-              <Text style={{color: colorMode, fontSize: 15}}>Share</Text>
+              <Text style={{color: colorMode, fontSize: sc(14.5) > 22 ? 22 : sc(14.5)}}>Share</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity 
@@ -108,13 +107,13 @@ const MenuContainer = ({isVisible, onClose, openRenameTitle}: MainContainerProps
             }}>
             <View style={styles.buttons}>
               <Icon name={'pen'} size={20} color={colorMode} />
-              <Text style={{color: colorMode, fontSize: 15}}>Rename</Text>
+              <Text style={{color: colorMode, fontSize: sc(14.5) > 22 ? 22 : sc(14.5)}}>Rename</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity onPress={deleteChat}>
             <View style={styles.buttons}>
               <Icon name={'trash-can'} size={20} color={colorMode} />
-              <Text style={{color: colorMode, fontSize: 15}}>Delete</Text>
+              <Text style={{color: colorMode, fontSize: sc(14.5) > 22 ? 22 : sc(14.5)}}>Delete</Text>
             </View>
           </TouchableOpacity>
           
@@ -140,6 +139,7 @@ const styles = StyleSheet.create({
     },
 
     padding: 25,
+    paddingRight: 40,
     borderRadius: 15,
   },
   buttons: {
