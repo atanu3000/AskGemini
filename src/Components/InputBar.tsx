@@ -124,9 +124,9 @@ const InputBar: React.FC<InputBarProps> = ({
                   style={{paddingHorizontal: sc(7) > 15 ? 15 : sc(7)}}>
                   <Icon name={'image'} size={iconSize} color={colorMode} />
                 </TouchableOpacity>
-                <TouchableOpacity style={{paddingHorizontal: sc(7) > 15 ? 15 : sc(7)}}>
+                {/* <TouchableOpacity style={{paddingHorizontal: sc(7) > 15 ? 15 : sc(7)}}>
                   <Icon name={'paperclip'} size={iconSize} color={colorMode} />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
               </>
             )}
             <TouchableOpacity

@@ -22,7 +22,7 @@ import {useTheme} from '../Context/ThemeContext';
 import LinearGradient from 'react-native-linear-gradient';
 import LottieView from 'lottie-react-native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
-import { sc } from '../assets/Styles/Dimensions';
+import {sc} from '../assets/Styles/Dimensions';
 
 type SignupScreenProps = NativeStackScreenProps<AuthStackParamList, 'Signup'>;
 
@@ -36,37 +36,29 @@ const Signup = ({navigation}: SignupScreenProps) => {
   const [error, setError] = useState<string>('');
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [repeatPassword, setRepeatPassword] = useState<string>('');
+  const [phone, setPhone] = useState<string>('');
+  // const [password, setPassword] = useState<string>('');
+  // const [repeatPassword, setRepeatPassword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isPasswordHide, setIsPasswordHide] = useState<boolean>(true);
+  // const [isPasswordHide, setIsPasswordHide] = useState<boolean>(true);
 
   const handleSignup = () => {
-    if (
-      name.length < 1 ||
-      email.length < 1 ||
-      password.length < 1 ||
-      repeatPassword.length < 1
-    ) {
+    if (name.length < 1 || email.length < 1 || phone.length < 1) {
       setError('All fields are required');
-    } else if (password.length < 8) {
-      setError('Passwords length must be 8 characters');
-    } else if (password !== repeatPassword) {
-      setError('Passwords must be same');
     } else {
       setIsLoading(true);
       const user = {
         email,
-        password,
+        phone,
         name,
       };
 
       appwrite
         .CreatAccount(user)
         .then(_ => {
-          setIsLogedin(true);
+          // setIsLogedin(true);
           setIsLoading(false);
-          ToastAndroid.show('Signup success', ToastAndroid.SHORT);
+          navigation.navigate('Login', {userEmail: email});
         })
         .catch(err => {
           console.log(err);
@@ -79,16 +71,20 @@ const Signup = ({navigation}: SignupScreenProps) => {
 
   return (
     <LinearGradient
-      colors={['#ffffff00', '#a7c2fc'+`${theme === 'dark'  ? '44' : '88'}`]}
+      colors={['#ffffff00', '#a7c2fc' + `${theme === 'dark' ? '44' : '88'}`]}
       style={[styles.container, {backgroundColor: ThemeColor}]}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <StatusBar backgroundColor={ThemeColor} barStyle={barStyle} />
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.headContainer}>
             <View style={{width: '50%'}}>
-              <Text style={{fontSize: sc(30) > 40 ? 60 : sc(30), fontWeight: '500', color: FontColor}}>
+              <Text
+                style={{
+                  fontSize: sc(30) > 40 ? 60 : sc(30),
+                  fontWeight: '500',
+                  color: FontColor,
+                }}>
                 Sign up
               </Text>
               <Text style={{fontSize: sc(14) > 20 ? 23 : 16, color: FontColor}}>
@@ -97,7 +93,12 @@ const Signup = ({navigation}: SignupScreenProps) => {
             </View>
             <LottieView
               source={require('../assets/signin-animation.json')}
-              style={{height: sc(190), width: sc(190), maxHeight: 320, maxWidth: 320}}
+              style={{
+                height: sc(190),
+                width: sc(190),
+                maxHeight: 320,
+                maxWidth: 320,
+              }}
               autoPlay
               loop
             />
@@ -134,53 +135,22 @@ const Signup = ({navigation}: SignupScreenProps) => {
             />
           </View>
 
-          {/* Password */}
+          {/* Phone no. */}
           <View style={[styles.inputBar, {backgroundColor: ThemeColor}]}>
-            <Icon name={'lock'} size={20} color={FontColor} />
+            <Icon name={'mobile-screen'} size={20} color={FontColor} />
             <TextInput
-              value={password}
+              value={phone}
+              keyboardType="numeric"
               onChangeText={text => {
                 setError('');
-                setPassword(text);
+                setPhone(text);
               }}
               placeholderTextColor={'#AEAEAE'}
-              placeholder="Password"
-              secureTextEntry={isPasswordHide}
+              placeholder="Phone Number"
               style={styles.input}
             />
-            <TouchableWithoutFeedback
-              onPress={() => setIsPasswordHide(!isPasswordHide)}>
-              <Icon
-                name={isPasswordHide ? 'eye' : 'eye-slash'}
-                size={20}
-                color={FontColor}
-              />
-            </TouchableWithoutFeedback>
           </View>
 
-          {/* Repeat password */}
-          <View style={[styles.inputBar, {backgroundColor: ThemeColor}]}>
-            <Icon name={'lock'} size={20} color={FontColor} />
-            <TextInput
-              secureTextEntry={isPasswordHide}
-              value={repeatPassword}
-              onChangeText={text => {
-                setError('');
-                setRepeatPassword(text);
-              }}
-              placeholderTextColor={'#AEAEAE'}
-              placeholder="Repeat Password"
-              style={styles.input}
-            />
-            <TouchableWithoutFeedback
-              onPress={() => setIsPasswordHide(!isPasswordHide)}>
-              <Icon
-                name={isPasswordHide ? 'eye' : 'eye-slash'}
-                size={20}
-                color={FontColor}
-              />
-            </TouchableWithoutFeedback>
-          </View>
           {/* Validation error */}
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
@@ -193,7 +163,7 @@ const Signup = ({navigation}: SignupScreenProps) => {
 
           {/* Login navigation */}
           <Pressable
-            onPress={() => navigation.navigate('Login')}
+            onPress={() => navigation.navigate('Login', {})}
             style={styles.loginContainer}>
             <Text style={[styles.haveAccountLabel, {color: FontColor}]}>
               Already have an account?{'  '}
@@ -283,7 +253,7 @@ const styles = StyleSheet.create({
   },
   loginContainer: {
     marginTop: 40,
-    
+
     paddingBottom: 30,
   },
   haveAccountLabel: {

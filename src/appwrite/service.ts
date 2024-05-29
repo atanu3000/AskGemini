@@ -1,21 +1,16 @@
-import { ID, Account, Client } from 'appwrite';
+import { ID, Account, Client, Teams } from 'appwrite';
 import { APPWRITE } from '../../API';
 
-
 const appwriteClient = new Client();
-
+    
 const APPWRITE_ENDPOINT: string = APPWRITE.ENDPOINT;
 const APPWRITE_PROJECT_ID: string = APPWRITE.PROJECT_ID;
 
 type CreatUserAccount = {
     email: string;
-    password: string;
+    phone: string;
+    password?: string;
     name: string;
-}
-
-type LoginUserAccount = {
-    email: string;
-    password: string;
 }
 
 class AppwriteService {
@@ -29,19 +24,15 @@ class AppwriteService {
         this.account = new Account(appwriteClient)
     }
 
-    async CreatAccount({ email, password, name }: CreatUserAccount) {
+    async CreatAccount({ email, password = 'password', name}: CreatUserAccount) {
         try {
             const userAccount = await this.account.create(
                 ID.unique(),
                 email,
-                password,
+                password!,
                 name
             )
-            if (userAccount) {
-                return this.LoginAccount({ email, password })
-            } else {
-                return userAccount
-            }
+            userAccount
 
         } catch (error) {
             console.log("Appwrite :: CreateAccount() error: " + error);
@@ -49,17 +40,23 @@ class AppwriteService {
         }
     }
 
-    async LoginAccount({ email, password }: LoginUserAccount) {
-        // try {
-            return await this.account.createEmailPasswordSession(email, password);
-        // } catch (error) {
-        //     console.log("Appwrite :: LoginAccount() error: " + error);
-        // }
+    async LoginAccount(emailOrPhone: string) {
+        return await this.account.createEmailToken(ID.unique(), emailOrPhone)
+    }
+
+    async updateName(name: string) {
+        return await this.account.updateName(name);
+    }
+
+
+    async createSession(userID: string, secret: string) {
+        return await this.account.createSession(userID, secret);
     }
 
     async GetCurrentUser() {
         try {
-            return await this.account.get();
+            const res = await this.account.get();
+            return res
         } catch (error) {
             console.log("Appwrite :: GetCurrentUser() error: " + error);
         }

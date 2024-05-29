@@ -8,7 +8,8 @@ import Welcome from '../Screens/Welcome';
 
 export type AuthStackParamList = {
   Signup: undefined;
-  Login: undefined;
+  Login: {userEmail?: string};
+  VerifyOTP: undefined;
   Welcome: undefined;
 };
 
