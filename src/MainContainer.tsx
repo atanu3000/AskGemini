@@ -45,7 +45,7 @@ const MainContainer = () => {
   const FontColor = !isDarkTheme ? '#212121' : '#fff';
   const barStyle = !isDarkTheme ? 'dark-content' : 'light-content';
   const {width, height} = Dimensions.get('window');
-  const drawerWidth = (width * 0.8) > 800 ? 800 : (width * 0.8);
+  const drawerWidth = width * 0.8 > 800 ? 800 : width * 0.8;
   const [settingVisible, setSettingVisible] = useState<boolean>(false);
 
   const modelImage = require('../android/app/src/main/res/mipmap-hdpi/ic_launcher.png');
@@ -80,13 +80,9 @@ const MainContainer = () => {
     const intervalId = setInterval(async () => {
       const chatContents = await getChats();
       setChats(chatContents);
-      // AsyncStorage.setItem('AskGemini_ChatHistory', JSON.stringify([]))
     }, 1000);
     return () => clearInterval(intervalId);
   }, []);
-  //  console.log(chats);
-  //  console.log(chatId);
-
   const viewChatHistory = (chatContent: chatsType, id: string) => {
     if (!isLoading) {
       setIsChatStarted(true);
@@ -99,25 +95,35 @@ const MainContainer = () => {
 
   const NavigationView: React.FC = () => {
     return (
-      <View style={{height: '100%', flex: 1, paddingTop: height * 0.04, alignItems: 'center'}}>
+      <View
+        style={{
+          height: '100%',
+          paddingTop: height * 0.04,
+          alignItems: 'center',
+        }}>
         <View style={{width: '100%', alignItems: 'center'}}>
           <TouchableWithoutFeedback>
             <View
               style={[
                 styles.searchBox,
-                {backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675',
-                width: '95%'},
+                {
+                  backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675',
+                  width: '95%',
+                },
               ]}>
               <Icon name={'magnifying-glass'} size={16} color={FontColor} />
               <Text style={{color: FontColor, fontSize: 15}}>Search</Text>
             </View>
           </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback onPress={() => drawer.current?.closeDrawer()}>
+          <TouchableWithoutFeedback
+            onPress={() => drawer.current?.closeDrawer()}>
             <View
               style={[
                 styles.newChat,
-                {backgroundColor: !isDarkTheme ? '#acdcfa' : '#60879e',
-                width: '100%'},
+                {
+                  backgroundColor: !isDarkTheme ? '#acdcfa' : '#60879e',
+                  width: '100%',
+                },
               ]}>
               <Image source={modelImage} style={{height: 35, width: 35}} />
               <Text style={{color: FontColor, fontSize: 15}}>AskGemini</Text>
@@ -160,15 +166,15 @@ const MainContainer = () => {
           onPress={() => {
             drawer.current?.closeDrawer();
             setSettingVisible(true);
-            // navigation.navigate('Settings', {
-            //   name: userData?.name,
-            //   email: userData?.email,
-            // });
           }}
           style={[
             styles.profileButton,
-            {backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675',
-            width: drawerWidth * 0.95},
+            {
+              backgroundColor: !isDarkTheme ? '#9dbafa' : '#485675',
+              width: drawerWidth * 0.95,
+              position: 'absolute',
+              bottom: 0,
+            },
           ]}>
           <View
             style={{
@@ -188,8 +194,11 @@ const MainContainer = () => {
                   {userData?.name}
                 </Text>
                 <Text style={{color: FontColor}}>
-                  {userData?.email.split('').slice(0, sc(16) > 25 ? 25 : sc(16))}
-                  {userData?.email.length! > (sc(16) > 27 ? 27 : sc(16)) && '...'}
+                  {userData?.email
+                    .split('')
+                    .slice(0, sc(16) > 25 ? 25 : sc(16))}
+                  {userData?.email.length! > (sc(16) > 27 ? 27 : sc(16)) &&
+                    '...'}
                 </Text>
               </View>
             </View>
@@ -204,7 +213,7 @@ const MainContainer = () => {
   return (
     <DrawerLayoutAndroid
       ref={drawer}
-      drawerWidth={ drawerWidth }
+      drawerWidth={drawerWidth}
       drawerPosition={'left'}
       drawerBackgroundColor={!isDarkTheme ? '#6a97f7' : '#1e2b47'}
       renderNavigationView={() => <NavigationView />}>
@@ -219,6 +228,7 @@ const MainContainer = () => {
               barStyle={barStyle}
               translucent
             />
+
             <Modal
               animationType="slide"
               visible={settingVisible}
@@ -254,7 +264,7 @@ const styles = StyleSheet.create({
   },
   searchBox: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 5,
     alignItems: 'center',
     borderRadius: 30,
     paddingVertical: 15,

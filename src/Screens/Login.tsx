@@ -37,10 +37,8 @@ const Login = ({navigation, route}: LoginScreenProps) => {
   const [error, setError] = useState<string>('');
 
   const [emailOrPhone, setEmailOrPhone] = useState<string>(userEmail as string);
-  const [password, setPassword] = useState<string>('');
   const [OTP, setOTP] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isPasswordHide, setIsPasswordHide] = useState<boolean>(true);
   const [isOTPsent, setIsOTPsent] = useState<boolean>(false);
   const [sessionToekn, setSessionToekn] = useState<string>('');
   const OTPinputRef = useRef<TextInput>(null);
@@ -91,7 +89,7 @@ const Login = ({navigation, route}: LoginScreenProps) => {
         .then(response => {
           if (response) {
             setIsLoading(false);
-            console.log(response);
+            // console.log(response);
 
             navigation.reset({
               index: 0,

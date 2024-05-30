@@ -115,7 +115,7 @@ const Signup = ({navigation}: SignupScreenProps) => {
               }}
               placeholderTextColor={'#AEAEAE'}
               placeholder="Name"
-              style={styles.input}
+              style={[styles.input, {color: FontColor}]}
             />
           </View>
 
@@ -131,7 +131,7 @@ const Signup = ({navigation}: SignupScreenProps) => {
               }}
               placeholderTextColor={'#AEAEAE'}
               placeholder="Email"
-              style={styles.input}
+              style={[styles.input, {color: FontColor}]}
             />
           </View>
 
@@ -147,7 +147,7 @@ const Signup = ({navigation}: SignupScreenProps) => {
               }}
               placeholderTextColor={'#AEAEAE'}
               placeholder="Phone Number"
-              style={styles.input}
+              style={[styles.input, {color: FontColor}]}
             />
           </View>
 

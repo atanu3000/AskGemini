@@ -316,7 +316,6 @@ React.useEffect(() => {
     setMenuContainerVisible(false);
   }
 
-  const {width} = Dimensions.get('window');
   const modelImage = require('../../android/app/src/main/res/mipmap-hdpi/ic_launcher.png');
   const {height} = Dimensions.get('screen');
   
@@ -334,7 +333,6 @@ React.useEffect(() => {
               onPress={() => {
                 openDrawer.current?.openDrawer();
                 textInputRef.current?.blur();
-                // setShowMenu(!showMenu);
                 setMenuContainerVisible(false);
               }}
               style={{padding: 10, borderRadius: 10}}>
